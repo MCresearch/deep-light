@@ -1,2 +1,2 @@
-# DeepZernike
-Use Deep Learning to Recover Zernike Coefficients
+# deep-light
+We aim to use deep learning techniques to recover Zernike Coefficients.
