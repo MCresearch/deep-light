@@ -110,7 +110,7 @@ bool Input::INIT()   //
 		}
 		
 		INPUT.n_grid = pow(2,INPUT.mm);
-		INPUT.n9 = INPUT.n_grid+9; 
+		INPUT.n9 = INPUT.n_grid;
 		INPUT.n1 = INPUT.n_grid/2+1; 
 		
 		INPUT.aa0 = INPUT.xx0*INPUT.a0; 

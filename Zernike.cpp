@@ -1,5 +1,29 @@
 #include "Zernike.h"
 
+void rdm_gauss(double &a1, double &rdmg)
+{
+    double PI = 0.0;
+    double PI2 = 0.0;
+    double asd = 0.0;
+    double r01 = 0.0;
+    double r02 = 0.0;
+    double rq = 0.0;
+    PI =  3.14159265358979;
+    PI2 = 2 * PI;
+    rq = pow(PI,(8 + PI)) + PI;
+    
+    asd = a1;
+	asd = asd * rq;
+	asd = asd-(int)asd;
+	r01 = sqrt( - 2 * log(asd));
+	asd = asd * rq;
+	asd = asd-(int)asd;
+	r02 = PI2 * asd;
+		
+	rdmg = r01 * cos(r02);
+	a1 = asd;
+}
+
 int maxZernike(int nk)
 {
     int maxZernike = 0;

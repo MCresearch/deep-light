@@ -1,5 +1,7 @@
 #include "optical_field.h"
 #include <random>
+#include <fstream>
+#include <sstream>
 
 OPT::OPT(){}
 
@@ -35,11 +37,11 @@ bool OPT::Init_Intensity(OPT &opt)
 	a02 = INPUT.a0*INPUT.a0;
 	for(int j = 0; j < INPUT.n_grid; j++)
 	{
-		y = (j-INPUT.n1)*INPUT.dxy0;
+		y = (j+1-INPUT.n1)*INPUT.dxy0;  // +不加1
 		y2 = y * y;
 		for(int i = 0; i < INPUT.n_grid; i++)
 		{
-			x = (i-INPUT.n1)*INPUT.dxy0;
+			x = (i+1-INPUT.n1)*INPUT.dxy0;
 			x2 = x*x;
 			r2 = x2+y2;
 			opt.ur[i][j] = exp(-1 * pow(r2/a02, INPUT.mgs));
@@ -47,11 +49,23 @@ bool OPT::Init_Intensity(OPT &opt)
 		}
 	}
 	// 存储光强
-
-
-	
-			
-
+	ofstream outfile1;
+	outfile1.open("inIntensity.dat", ios::app);
+	outfile1.setf(ios::fixed, ios::floatfield); 
+    outfile1.precision(6);  
+	if(!outfile1.is_open())
+	{
+		cout << "open file failure" << endl;
+	}
+	for(int i = 0; i < INPUT.n_grid; i++)
+	{
+		for(int j = 0; j < INPUT.n_grid; j++)
+		{
+			outfile1 << pow(opt.ur[i][j],2)+pow(opt.ui[i][j],2) << '\t';
+		}
+		outfile1 <<  endl;
+	}
+	outfile1.close();
 }
 
 
@@ -67,7 +81,7 @@ bool OPT::Init_Phase(OPT &opt, double a1)
 	double r2 = 0.0;
 	double uri = 0.0;
     double ss = 0.0;
-    double rdmg = 0.0;
+    //double rdmg = 0.0;
 	double a02 = 0.0;
 	ss = 0;
 	a02 = INPUT.a0*INPUT.a0;
@@ -92,18 +106,27 @@ bool OPT::Init_Phase(OPT &opt, double a1)
 	default_random_engine random(a1);
     std::normal_distribution<double> dis(0,1);  
 
+	double rdmg[200];
+	ifstream ifs("rdmg.dat");
 	for(int i=3; i <= opt.maxZnkDim; i++)
 	{
-		rdmg = dis(random);
+		ifs >> rdmg[i];
+	}
+	ifs.close();
+
+	for(int i=3; i <= opt.maxZnkDim; i++)
+	{
+		//rdmg = dis(random);
+		//rdm_gauss(a1,rdmg);
 		opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
-		opt.aznk[i] = rdmg * opt.eznk[i];
+		opt.aznk[i] = rdmg[i] * opt.eznk[i];
 		ss = ss + pow(opt.aznk[i],2);
 	}
 		
 	//系数按方差rms归一化
 	for(int i=3; i <= opt.maxZnkDim; i++)
 	{
-		opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms/ss)
+		opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms/ss);
 	}
 	/*
 	open(11,file='zernike_coeff.dat')
@@ -112,6 +135,19 @@ bool OPT::Init_Phase(OPT &opt, double a1)
 	end do
 	close(1)
 	*/
+	ofstream outfile2;
+	outfile2.open("zernike_coeff.dat", ios::app);
+	//outfile2.setf(ios::fixed, ios::floatfield); 
+    //outfile2.precision(6);  
+	if(!outfile2.is_open())
+	{
+		cout << "open file failure" << endl;
+	}
+	for(int i = 1; i <= opt.maxZnkDim; i++)
+	{
+		outfile2 << i << "\t" << opt.aznk[i]  << '\t' << opt.nznk[i] << "\t" << opt.eznk[i]<< endl;
+	}
+	outfile2.close();
 
 	//设置相位
 	for(int j = 0; j < INPUT.n_grid; j++)
@@ -137,13 +173,25 @@ bool OPT::Init_Phase(OPT &opt, double a1)
 			}		
 		}
 	} 
-		/*
-open(1,file='inPhase.dat')
-do j=1,n_grid
-write(1,111)(ph(i,j),i=1,n_grid)
-end do
-close(1)
-*/	
+	ofstream outfile3;
+	outfile3.open("inPhase.dat", ios::app);
+	//outfile3.setf(ios::fixed, ios::floatfield); 
+    //outfile3.precision(6);  
+	if(!outfile3.is_open())
+	{
+		cout << "open file failure" << endl;
+	}
+	for(int i = 0; i < INPUT.n_grid; i++)
+	{
+		for(int j = 0; j < INPUT.n_grid; j++)
+		{
+			outfile3 << opt.ph[i][j] << '\t';
+		}
+		outfile3 <<  endl;
+	}
+	outfile3.close();
+
+
 	delete []opt.aznk;
 	delete []opt.eznk;  
 	delete []opt.pl;  
@@ -186,17 +234,38 @@ void OPT::numercial_diffraction(OPT &opt)
 	PI = atan(1)*4;
 	wave_number = 2 * PI / INPUT.plm;	
 
+	
+
 	focusing(INPUT.n_grid, INPUT.n9, INPUT.n1, opt.ur, opt.ui, wave_number, dxy0, 1 / INPUT.zfh);
 
 	mdfph(INPUT.n_grid, INPUT.n9, INPUT.n1, opt.ur, opt.ui, dxy0, dlta, 1, wave_number);
+	
+	my_fft_1(INPUT.n9, opt.ur, opt.ui);
 
-	my_fft_1(INPUT.n9, ur, ui);
+	ofstream outfile4;
+	outfile4.open("urfft.dat", ios::app);
+	//outfile4.setf(ios::fixed, ios::floatfield); 
+    //outfile4.precision(6);  
+	if(!outfile4.is_open())
+	{
+		cout << "open file failure" << endl;
+	}
+	for(int i = 0; i < INPUT.n_grid; i++)
+	{
+		for(int j = 0; j < INPUT.n_grid; j++)
+		{
+			outfile4 << pow(opt.ur[i][j],2)+pow(opt.ui[i][j],2) << '\t';
+		}
+		outfile4 <<  endl;
+	}
+	outfile4.close();
+
 
 	prop1(INPUT.n_grid, INPUT.n9, INPUT.n1, hr, hi, zzzz, wave_number, INPUT.aa0);
 
 	evol1(INPUT.n_grid, INPUT.n9, hr, hi, opt.ur, opt.ui);
 
-	my_fft_2(INPUT.n9, ur, ui);
+	my_fft_2(INPUT.n9, opt.ur, opt.ui);
 
 	mdfph(INPUT.n_grid, INPUT.n9, INPUT.n1, opt.ur, opt.ui, dxyz, dlta, ddxz, - wave_number);
 
@@ -205,8 +274,8 @@ void OPT::numercial_diffraction(OPT &opt)
 	{
 		for(int i = 0; i < INPUT.n_grid; i++)
 		{
-			ur[i][j] = ur[i][j]/ddxz;
-	    	ui[i][j] = ui[i][j]/ddxz;
+			opt.ur[i][j] = opt.ur[i][j]/ddxz;
+	    	opt.ui[i][j] = opt.ui[i][j]/ddxz;
 		}
 	}
 }

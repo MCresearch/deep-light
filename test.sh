@@ -6,6 +6,6 @@ rm -r -f ./result.txt
 cmake -B bulid
 cd bulid
 make
-cp -f  mymd ../
+cp -f  mylight ../
 cd ..
 

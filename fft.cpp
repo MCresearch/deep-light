@@ -1,6 +1,8 @@
+#include "fft.h"
 #include <iostream>
-#include "fftw3.h"
-#pragma comment(lib, "libfftw3-3.lib")
+//#include <complex.h>
+#include <fftw3.h>
+#include <typeinfo>
 
 //实部与虚部
 #define REAL 0
@@ -21,7 +23,7 @@ void my_fft_1(int N, double** &ur, double** &ui)
     double* ui2;
     ur2 = new double[INPUT.n_grid*INPUT.n_grid]();
     ui2 = new double[INPUT.n_grid*INPUT.n_grid]();
-
+    cout<<"001"<<endl;
     for(int i = 0; i < INPUT.n_grid; i++)
     {
         for(int j=0; j < INPUT.n_grid; j++)
@@ -44,16 +46,18 @@ void my_fft_1(int N, double** &ur, double** &ui)
     {
         for (int i=0; i<N*N; i++)
         {
-            in[i][REAL] = ur2[];
-            in[i][IMAG] = ui2[];
+            
+            in[i][REAL] = ur2[i];
+            in[i][IMAG] = ui2[i];
+           
         }
     }
-
+    
     p = fftw_plan_dft_2d(N, N, in, out, FFTW_FORWARD, FFTW_ESTIMATE);
     fftw_execute(p);
     fftw_destroy_plan(p);
     fftw_cleanup();
-
+   
     for (int i=0; i<N*N; i++)
     {
         printf("%f, %fi\n", in[i][0], in[i][1]);
@@ -66,7 +70,7 @@ void my_fft_1(int N, double** &ur, double** &ui)
     
     k = 0;
     int j = 0;
-    int i = 0
+    int i = 0;
     for (int h = 0; h<N*N; h++)
     {
         ur[i][j] = out[h][0];
@@ -83,8 +87,6 @@ void my_fft_1(int N, double** &ur, double** &ui)
         fftw_free(in);
     if (out!=NULL)
         fftw_free(out);
-
-    return 0;
 
 }
 
@@ -125,12 +127,12 @@ void my_fft_2(int N, double** &ur, double** &ui)
     {
         for (int i=0; i<N*N; i++)
         {
-            in[i][REAL] = ur2[];
-            in[i][IMAG] = ui2[];
+            in[i][REAL] = ur2[i];
+            in[i][IMAG] = ui2[i];
         }
     }
 
-    p = fftw_plan_dft_2d(N, N, in, out, FFTW_BACKWORD, FFTW_ESTIMATE);
+    p = fftw_plan_dft_2d(N, N, in, out, FFTW_BACKWARD, FFTW_ESTIMATE);
     fftw_execute(p);
     fftw_destroy_plan(p);
     fftw_cleanup();
@@ -147,7 +149,7 @@ void my_fft_2(int N, double** &ur, double** &ui)
     
     k = 0;
     int j = 0;
-    int i = 0
+    int i = 0;
     for (int h = 0; h<N*N; h++)
     {
         ur[i][j] = out[h][0];
@@ -165,7 +167,4 @@ void my_fft_2(int N, double** &ur, double** &ui)
     if (out!=NULL)
         fftw_free(out);
 
-    return 0;
-
 }
-
