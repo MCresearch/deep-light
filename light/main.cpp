@@ -7,6 +7,7 @@
 #include "Zernike.h"
 #include "input.h"
 #include "optical_field.h"
+#include "FFt.h"
 #include<time.h>
 
 
