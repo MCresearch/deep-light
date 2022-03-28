@@ -1,35 +1,33 @@
 #ifndef OPTICAL_FIELD
 #define OPTICAL_FIELD
 
-#include "fun.h"
 #include "Zernike.h"
-#include "input.h"
 #include "fft.h"
+#include "fun.h"
+#include "input.h"
 
 
-class OPT
-{
-	public:
-		OPT();
-		~OPT();
-		
-		
-		static bool Init_Intensity(OPT &opt);
-		static bool Init_Phase(OPT &opt, double a1);
-		static void numercial_diffraction(OPT &opt);
+class OPT {
+public:
+    OPT();
+    ~OPT();
 
-		double** ur;
-        double** ui;
-        int maxZnkDim;
 
-        double* aznk;
-        double* eznk;
-        double* pl;
-        double** ph;
+    static bool Init_Intensity(Input &INPUT, OPT& opt);
+    static bool Init_Phase(Input &INPUT, OPT& opt, const double a1);
+    static void numercial_diffraction(Input &INPUT, OPT& opt);
 
-		int* nznk;
-		int* mznk;
-		int* lznk;
-	 
+    double** ur;
+    double** ui;
+    int      maxZnkDim;
+
+    double*  aznk;
+    double*  eznk;
+    double*  pl;
+    double** ph;
+
+    int* nznk;
+    int* mznk;
+    int* lznk;
 };
- #endif
+#endif

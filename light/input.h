@@ -1,51 +1,51 @@
 #ifndef INPUT_H
 #define INPUT_H
-#include <iostream>
-#include <cmath>
-#include <string>
-#include <cstring>
 #include <assert.h>
+#include <cmath>
+#include <cstring>
 #include <fstream>
-#include <sstream>
 #include <iomanip>
+#include <iostream>
 #include <math.h>
+#include <sstream>
+#include <string>
 
 using namespace std;
 
-class Input
+class Input 
 {
-	public:
-		Input();
-		~Input();
-		
-		int mm;  
-        int n_grid;
-        int n9;
-        int n1;
+public:
+    Input();
+    ~Input();
 
-        int mgs;
+    int mm;
+    int n_grid;
+    int n9;
+    int n1;
 
-        double a0;
-        double xx0;
-        double aa0;
-        double dxy0;
+    int mgs;
 
-        double plm;
-        double zfh;
+    double a0;
+    double xx0;
+    double aa0;
+    double dxy0;
 
-        double airy;
-        double xxz;
-        double aaz;
-        double dxyz;
+    double plm;
+    double zfh;
 
-        int minZnkDim;
-        int maxZnkOrder;
+    double airy;
+    double xxz;
+    double aaz;
+    double dxyz;
 
-        double rms;
-        double eeznk;
-    
-		bool INIT();
- } ;
- 
- extern Input INPUT;
+    int minZnkDim;
+    int maxZnkOrder;
+
+    double rms;
+    double eeznk;
+
+    bool INIT(Input &INPUT);
+};
+
+//extern Input INPUT;
 #endif

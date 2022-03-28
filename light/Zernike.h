@@ -4,9 +4,9 @@
 #include "input.h"
 
 void rdm_gauss(double &a1, double &rdmg);
-int maxZernike(int nk);
-void nmlznk(int maxZnkOrder,int &maxZnkDim, int* &nznk,int* &mznk,int* &lznk);
-int lznk_a(int l, int ni);
-void zernike_cg(int N, double* &zer, double x, double y);
+int  maxZernike(const int nk);
+void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk, int *&lznk);
+int  lznk_a(const int l, const int ni);
+void zernike_cg(const int N, const double x, const double y, double *&zer);
 
- #endif
+#endif

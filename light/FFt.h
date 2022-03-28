@@ -4,25 +4,23 @@
 #include "input.h"
 
 
-class FFT
-{
-    public:
-        FFT();
-        ~FFT();
-		
-		static bool fft_initialize(int mm, int n, FFT &fft);
-        static void itoc(int ik, int* &kk, int mm);
-        static int ctoi(int* &kk, int mm);
-        static void my_fft2d(FFT &fft, int n9, double** &xr, double** &xi, double dx, int kt);
+class FFT {
+public:
+    FFT();
+    ~FFT();
 
-		int mm;
-        int n;
-        int* kk;
-        int* kj;
-        int* km0;
-        int*** km;
-        double* wr;
-        double* wi;
-	 
+    static bool fft_initialize(const int mm, const int n, FFT& fft);
+    static void itoc(const int ik, const int mm, int *kk);
+    static int  ctoi(const int *kk, const int mm); // * &???
+    static void my_fft2d(const FFT& fft, const int n9, const double dx, const int kt, double **xr, double **xi);
+
+    int     mm;
+    int     n;
+    int*    kk;
+    int*    kj;
+    int*    km0;
+    int***  km;
+    double* wr;
+    double* wi;
 };
- #endif
+#endif

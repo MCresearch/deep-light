@@ -1,6 +1,19 @@
 #include "input.h"
 
-void prop1(int n_grid,int n1, double* &hr, double* &hi, double dz, double kp, double aa);
-void evol1(int n_grid,double* &hr, double* &hi, double** &ur, double** &ui);
-void mdfph(int n_grid,int n1, double** &ur, double** &ui, double dx, double dta, double ddx, double kp);
-void focusing(int n_grid,int n1, double** &ur, double** &ui, double kp, double dx, double rzf);
+void prop1(const int n_grid, const int n1, const double dz, const double kp, const double aa, double* hr, double* hi);
+void evol1(const int n_grid, const double* hr, const double* hi, double** ur, double** ui);
+void mdfph(const int    n_grid,
+           const int    n1,
+           const double dx,
+           const double dta,
+           const double ddx,
+           const double kp,
+           double**     ur,
+           double**     ui);
+void focusing(const int    n_grid,
+              const int    n1,
+              const double kp,
+              const double dx,
+              const double rzf,
+              double**     ur,
+              double**     ui);

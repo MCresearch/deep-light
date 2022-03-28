@@ -1,45 +1,53 @@
 #include "fun.h"
-void prop1(int n_grid, int n1, double* &hr, double* &hi, double dz, double kp, double aa)
+#define PI 3.141592653589793
+
+void prop1(const int n_grid, const int n1, const double dz, const double kp, const double aa, double* hr, double* hi)
 {
     double tt = 0.0;
     double t0 = 0.0;
-	int j1 = 0;
-    double PI = 3.141592653589793;
-    tt = dz / (2 * kp) * pow((2 * PI / aa) ,2);
-	for(int j = 0; j < n_grid; j++)
+    int    j1 = 0;
+    tt = dz / (2 * kp) * pow((2 * PI / aa), 2);
+    for (int j = 1; j <= n_grid; j++)
     {
-        j1 = j + 1 - n1;
-		t0 = tt * j1 * j1;
-		hr[j] = cos(-t0);
-		hi[j] = sin(-t0);
+        j1 = j - n1;
+        t0 = tt * j1 * j1;
+        hr[j - 1] = cos(-t0);
+        hi[j - 1] = sin(-t0);
     }
 }
 
-void evol1(int n_grid,double* &hr, double* &hi, double** &ur, double** &ui)
+void evol1(const int n_grid, const double* hr, const double* hi, double** ur, double** ui)
 {
     double cx = 0.0;
-    for(int j = 0; j < n_grid; j++)
+    for (int j = 1; j <= n_grid; j++)
     {
-        for(int i = 0; i < n_grid; i++)
+        for (int i = 1; i <= n_grid; i++)
         {
-            cx = ur[i][j];
-			ur[i][j] = cx * hr[i] - ui[i][j] * hi[i];
-			ui[i][j] = cx * hi[i] + ui[i][j] * hr[i];
+            cx = ur[i - 1][j - 1];
+            ur[i - 1][j - 1] = cx * hr[i - 1] - ui[i - 1][j - 1] * hi[i - 1];
+            ui[i - 1][j - 1] = cx * hi[i - 1] + ui[i - 1][j - 1] * hr[i - 1];
         }
     }
 
-    for(int j = 0; j < n_grid; j++)
+    for (int j = 1; j <= n_grid; j++)
     {
-        for(int i = 0; i < n_grid; i++)
+        for (int i = 1; i <= n_grid; i++)
         {
-            cx = ur[i][j];
-			ur[i][j] = cx * hr[i] - ui[i][j] * hi[i];
-			ui[i][j] = cx * hi[i] + ui[i][j] * hr[i];
+            cx = ur[i - 1][j - 1];
+            ur[i - 1][j - 1] = cx * hr[i - 1] - ui[i - 1][j - 1] * hi[i - 1];
+            ui[i - 1][j - 1] = cx * hi[i - 1] + ui[i - 1][j - 1] * hr[i - 1];
         }
     }
 }
 
-void mdfph(int n_grid, int n1, double** &ur, double** &ui, double dx, double dta, double ddx, double kp)
+void mdfph(const int    n_grid,
+           const int    n1,
+           const double dx,
+           const double dta,
+           const double ddx,
+           const double kp,
+           double**     ur,
+           double**     ui)
 {
     double cx = 0.0;
     double y = 0.0;
@@ -49,30 +57,36 @@ void mdfph(int n_grid, int n1, double** &ur, double** &ui, double dx, double dta
     double ec = 0.0;
     double c = 0.0;
     double s = 0.0;
-    int i1 = 0;
-    int j1 = 0;
+    int    i1 = 0;
+    int    j1 = 0;
 
-    for(int j = 0; j < n_grid; j++)
+    for (int j = 1; j <= n_grid; j++)
     {
-        j1 = j + 1  - n1;
-		y = (j - n1) * dx;
-		ey = kp * y * y * dta / (2.0 * ddx);
-        for(int i = 0; i < n_grid; i++)
+        j1 = j - n1;
+        y = (j - n1) * dx;
+        ey = kp * y * y * dta / (2.0 * ddx);
+        for (int i = 1; i <= n_grid; i++)
         {
-            i1 = i + 1  - n1;
-			x = (i - n1) * dx;
-			ex = kp * x * x * dta / (2.0 * ddx);
-			ec = ex + ey;
-			c = cos(ec);
-			s = sin(ec);
-			ec = ur[i][j];
-			ur[i][j] = ec * c - ui[i][j] * s;
-			ui[i][j] = ec * s + ui[i][j] * c;
+            i1 = i - n1;
+            x = (i - n1) * dx;
+            ex = kp * x * x * dta / (2.0 * ddx);
+            ec = ex + ey;
+            c = cos(ec);
+            s = sin(ec);
+            ec = ur[i - 1][j - 1];
+            ur[i - 1][j - 1] = ec * c - ui[i - 1][j - 1] * s;
+            ui[i - 1][j - 1] = ec * s + ui[i - 1][j - 1] * c;
         }
-    }  
+    }
 }
 
-void focusing(int n_grid, int n1, double** &ur, double** &ui, double kp, double dx, double rzf)
+void focusing(const int    n_grid,
+              const int    n1,
+              const double kp,
+              const double dx,
+              const double rzf,
+              double**     ur,
+              double**     ui)
 {
     double x = 0.0;
     double y = 0.0;
@@ -81,21 +95,20 @@ void focusing(int n_grid, int n1, double** &ur, double** &ui, double kp, double 
     double s = 0.0;
     double c0 = 0.0;
 
-    if(abs(rzf) < 1e-10) return;
-    for(int j = 0; j < n_grid; j++)
+    if (abs(rzf) < 1e-10)
+        return;
+    for (int j = 1; j <= n_grid; j++)
     {
-        y = (j + 1  - n1) * dx;
-        for(int i = 0; i < n_grid; i++)
+        y = (j - n1) * dx;
+        for (int i = 1; i <= n_grid; i++)
         {
-            x = (i + 1  - n1) * dx;
-			ei =  - kp * (x * x + y * y) / 2 * rzf;
-			c = cos(ei);
-			s = sin(ei);
-			c0 = ur[i][j];
-			ur[i][j] = c0 * c - ui[i][j] * s;
-			ui[i][j] = c0 * s + ui[i][j] * c;
+            x = (i - n1) * dx;
+            ei = -kp * (x * x + y * y) / 2 * rzf;
+            c = cos(ei);
+            s = sin(ei);
+            c0 = ur[i - 1][j - 1];
+            ur[i - 1][j - 1] = c0 * c - ui[i - 1][j - 1] * s;
+            ui[i - 1][j - 1] = c0 * s + ui[i - 1][j - 1] * c;
         }
-    }  
-
-
+    }
 }

@@ -1,5 +1,5 @@
 #!/bin/bash
-cd test
+cd tests
 rm -f dl*
 cd ..
 make
