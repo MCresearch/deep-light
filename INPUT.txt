@@ -1,19 +1,19 @@
-mm 8							!'log2(网格数)
+mm 8							number of grid-point = 2^mm  log2(number of grid-point)  log2(网格数)
 
-mgs 8							!'光束截断指数
+mgs 8							pow( , mgs) = pow( ,truncated beams) !'光束截断指数
 
-a0 0.3						!'初始光场光斑半径/m
-xx0 4.0						!'初始光场缓冲区倍数
-
-
-plm 1e-6						!'波长/m
-zfh 3e3						!'传输距离/m
-
-xxz 20						!'焦区光场缓冲区倍数
+a0 0.3						    the spot radius of initial fields!'初始光场光斑半径/m
+xx0 4.0						    Multiple of initial light field buffer area !'初始光场缓冲区域倍数
 
 
-minZnkDim   1					!'多项式最小阶数
-maxZnkOrder 13				!'多项式最大阶次（最大为13）
+plm 1e-6						wave length !'波长/m
+zfh 3e3						    transmission distance !'传输距离/m
 
-rms 1							!'相位方差
-eeznk 0.2						!'多项式系数方差变化指数
+xxz 20						    multiple of focal light field buffer area!'焦区光场缓冲区倍数
+
+
+minZnkDim   1					minimum order of a polynomial!'多项式最小阶数
+maxZnkOrder 13				    maximum degree of polynomial!'多项式最大阶次（最大为13）
+
+rms 1							Phase variance !'相位方差
+eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方差变化指数
