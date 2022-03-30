@@ -24,8 +24,8 @@ int main()
 
     double a1 = 0.0;
 
-    a1 = 0.2391;               // seed
-    OPT::Init_Phase(INPUT, opt, a1);  // add for
+    a1 = 0.2391;                                 // seed
+    OPT::Init_Phase(INPUT, opt, a1, "confirm");  // add for "random" or "confirm"
 
     OPT::numercial_diffraction(INPUT, opt);
 

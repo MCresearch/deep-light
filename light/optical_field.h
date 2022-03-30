@@ -13,9 +13,9 @@ public:
     ~OPT();
 
 
-    static bool Init_Intensity(Input &INPUT, OPT& opt);
-    static bool Init_Phase(Input &INPUT, OPT& opt, const double a1);
-    static void numercial_diffraction(Input &INPUT, OPT& opt);
+    static bool Init_Intensity(Input& INPUT, OPT& opt);
+    static bool Init_Phase(Input& INPUT, OPT& opt, const double a1, const string type);
+    static void numercial_diffraction(Input& INPUT, OPT& opt);
 
     double** ur;
     double** ui;

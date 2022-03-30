@@ -55,7 +55,7 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt)
 }
 
 
-bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1)
+bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1, const string type)
 {
     // Init_Phase a1 is seed
     // Polynomial coefficient: Gaussian random number
@@ -94,102 +94,109 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1)
     {
         opt.ph[i] = new double[INPUT.n_grid]();
     }
-
-    default_random_engine            random(a1);
-    std::normal_distribution<double> dis(0, 1);
-
-    double   rdmg[200];
-    ifstream ifs("rdmg.dat");
-    for (int i = 3; i <= opt.maxZnkDim; i++)
+    if (type == "random")
     {
-        ifs >> rdmg[i];
-    }
-    ifs.close();
+        default_random_engine            random(a1);
+        std::normal_distribution<double> dis(0, 1);
 
-    for (int i = 3; i <= opt.maxZnkDim; i++)
-    {
-        // rdmg = dis(random);
-        // rdm_gauss(a1,rdmg);
-        // cout << i << "\t"<<rdmg[i] << endl;
-        opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
-        opt.aznk[i] = rdmg[i] * opt.eznk[i];
-        ss = ss + pow(opt.aznk[i], 2);
-    }
-
-    //系数按方差rms归一化
-    for (int i = 3; i <= opt.maxZnkDim; i++)
-    {
-        opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
-    }
-
-    output_zernike_coeff(INPUT.n_grid, "./tests/dl_zernike_coeff.dat", 7, opt.maxZnkDim, opt.aznk,
-                         opt.nznk, opt.eznk);
-
-    /*
-    ofstream outfile23;
-    outfile23.open("./tests/dl_pl_aznk.dat", ios::app);
-
-    //设置相位
-    for(int j = 0; j < INPUT.n_grid; j++)
-    {
-        y = (j+1-INPUT.n1)*INPUT.dxy0;
-        y2 = y * y;
-        for(int i = 0; i < INPUT.n_grid; i++)
+        double   rdmg[200];
+        ifstream ifs("rdmg.dat");
+        for (int i = 3; i <= opt.maxZnkDim; i++)
         {
-            x = (i+1-INPUT.n1)*INPUT.dxy0;
-            x2 = x * x;
-            r2 = x2 + y2;
-            if(r2/a02 <= 1)
-            {
-                zernike_cg(opt.maxZnkDim, x/INPUT.a0, y/INPUT.a0, opt.pl);
-
-                ofstream outfile22;
-                outfile22.open("./tests/dl_zernike_cg.dat", ios::app);
-                //outfile22.open("./tests/dl_x_y.dat", ios::app);
-                outfile22.setf(ios::fixed, ios::floatfield);
-                outfile22.precision(7);
-                //outfile22 << i << "\t" << j << "\t" <<  x/INPUT.a0 << "\t" <<  y/INPUT.a0<< endl;
-
-                if(!outfile22.is_open())
-                {
-                    cout << "./tests/open file failure" << endl;
-                }
-                for(int i = 1; i <= opt.maxZnkDim; i++)
-                {
-                    outfile22 << i << "\t" << opt.pl[i]  << endl;
-                }
-                outfile22.close();
-
-                opt.ph[i][j] = 0;
-                for(int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
-                {
-                    opt.ph[i][j] = opt.ph[i][j] + opt.pl[l] * opt.aznk[l];
-                    outfile23 << l << "\t" << opt.pl[l]  << "\t" << opt.aznk[l]  << endl;
-                }
-                uri = opt.ur[i][j];
-                opt.ur[i][j] = uri*cos(opt.ph[i][j]);
-                opt.ui[i][j]= uri*sin(opt.ph[i][j]);
-            }
+            ifs >> rdmg[i];
         }
-    }
+        ifs.close();
 
-    outfile23.close();
-    */
-    // tests********************************************************8
-    ifstream ifs1("./tests/inPhase.dat");
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
+        for (int i = 3; i <= opt.maxZnkDim; i++)
+        {
+            // rdmg = dis(random);
+            // rdm_gauss(a1,rdmg);
+            // cout << i << "\t"<<rdmg[i] << endl;
+            opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
+            opt.aznk[i] = rdmg[i] * opt.eznk[i];
+            ss = ss + pow(opt.aznk[i], 2);
+        }
+
+        //系数按方差rms归一化
+        for (int i = 3; i <= opt.maxZnkDim; i++)
+        {
+            opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
+        }
+
+        output_zernike_coeff(INPUT.n_grid, "./tests/dl_zernike_coeff.dat", 7, opt.maxZnkDim,
+                             opt.aznk, opt.nznk, opt.eznk);
+
+        ofstream outfile23;
+        outfile23.open("./tests/dl_pl_aznk.dat", ios::app);
+
+        //设置相位
         for (int j = 0; j < INPUT.n_grid; j++)
         {
-            ifs1 >> opt.ph[i][j];
-            uri = opt.ur[i][j];
-            opt.ur[i][j] = uri * cos(opt.ph[i][j]);
-            opt.ui[i][j] = uri * sin(opt.ph[i][j]);
-        }
-    }
-    ifs1.close();
+            y = (j + 1 - INPUT.n1) * INPUT.dxy0;
+            y2 = y * y;
+            for (int i = 0; i < INPUT.n_grid; i++)
+            {
+                x = (i + 1 - INPUT.n1) * INPUT.dxy0;
+                x2 = x * x;
+                r2 = x2 + y2;
+                if (r2 / a02 <= 1)
+                {
+                    zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
 
-    // tests*******************************************************
+                    ofstream outfile22;
+                    outfile22.open("./tests/dl_zernike_cg.dat", ios::app);
+                    // outfile22.open("./tests/dl_x_y.dat", ios::app);
+                    outfile22.setf(ios::fixed, ios::floatfield);
+                    outfile22.precision(7);
+                    // outfile22 << i << "\t" << j << "\t" <<  x/INPUT.a0 << "\t" <<  y/INPUT.a0<<
+                    // endl;
+
+                    if (!outfile22.is_open())
+                    {
+                        cout << "./tests/open file failure" << endl;
+                    }
+                    for (int i = 1; i <= opt.maxZnkDim; i++)
+                    {
+                        outfile22 << i << "\t" << opt.pl[i] << endl;
+                    }
+                    outfile22.close();
+
+                    opt.ph[i][j] = 0;
+                    for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
+                    {
+                        opt.ph[i][j] = opt.ph[i][j] + opt.pl[l] * opt.aznk[l];
+                        outfile23 << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
+                    }
+                    uri = opt.ur[i][j];
+                    opt.ur[i][j] = uri * cos(opt.ph[i][j]);
+                    opt.ui[i][j] = uri * sin(opt.ph[i][j]);
+                }
+            }
+        }
+        outfile23.close();
+    }
+
+    else if (type == "confirm")
+    {
+        ifstream ifs1("./tests/inPhase.dat");
+        for (int i = 0; i < INPUT.n_grid; i++)
+        {
+            for (int j = 0; j < INPUT.n_grid; j++)
+            {
+                ifs1 >> opt.ph[i][j];
+                uri = opt.ur[i][j];
+                opt.ur[i][j] = uri * cos(opt.ph[i][j]);
+                opt.ui[i][j] = uri * sin(opt.ph[i][j]);
+            }
+        }
+        ifs1.close();
+    }
+    else
+    {
+        cout << "input phase type error!" << endl;
+        exit(0);
+    }
+
     output_inIntensity(INPUT.n_grid, "./tests/dl_inPhase_intensity.dat", 6, opt.ur, opt.ui);
     output_inPhase(INPUT.n_grid, "./tests/dl_inPhase.dat", 6, opt.ph);
 
