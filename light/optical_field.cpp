@@ -51,23 +51,7 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt)
         }
     }
     // save inIntensity
-    ofstream outfile1;
-    outfile1.open("./tests/dl_inIntensity.dat", ios::app);
-    outfile1.setf(ios::fixed, ios::floatfield);
-    outfile1.precision(6);
-    if (!outfile1.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile1 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile1 << endl;
-    }
-    outfile1.close();
+    output_inIntensity(INPUT.n_grid, "./tests/dl_inIntensity.dat", 6, opt.ur, opt.ui);
 }
 
 
@@ -93,7 +77,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1)
     opt.nznk = new int[opt.maxZnkDim]();
     opt.mznk = new int[opt.maxZnkDim]();
     opt.lznk = new int[opt.maxZnkDim]();
-    nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk, opt.lznk); // delete lznk? 
+    nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk, opt.lznk);  // delete lznk?
 
     opt.aznk = new double[opt.maxZnkDim]();
     opt.eznk = new double[opt.maxZnkDim]();
@@ -137,19 +121,9 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1)
     {
         opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
     }
-    ofstream outfile2;
-    outfile2.open("./tests/dl_zernike_coeff.dat", ios::app);
-    outfile2.setf(ios::fixed, ios::floatfield);
-    outfile2.precision(7);
-    if (!outfile2.is_open())
-    {
-        cout << "./tests/open file failure" << endl;
-    }
-    for (int i = 1; i <= opt.maxZnkDim; i++)
-    {
-        outfile2 << i << "\t" << opt.aznk[i] << '\t' << opt.nznk[i] << "\t" << opt.eznk[i] << endl;
-    }
-    outfile2.close();
+
+    output_zernike_coeff(INPUT.n_grid, "./tests/dl_zernike_coeff.dat", 7, opt.maxZnkDim, opt.aznk,
+                         opt.nznk, opt.eznk);
 
     /*
     ofstream outfile23;
@@ -216,31 +190,8 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1)
     ifs1.close();
 
     // tests*******************************************************
-    ofstream outfile3;
-    ofstream outfile31;
-    outfile3.open("./tests/dl_inPhase.dat", ios::app);
-    outfile31.open("./tests/dl_inPhase_intensity.dat", ios::app);
-    outfile31.setf(ios::fixed, ios::floatfield);
-    outfile31.precision(6);
-    outfile3.setf(ios::fixed, ios::floatfield);
-    outfile3.precision(6);
-    if (!outfile3.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile3 << opt.ph[i][j] << '\t';
-            outfile31 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile3 << endl;
-        outfile31 << endl;
-    }
-    cout << "ph" << opt.ph[77][129] << endl;
-    outfile3.close();
-    outfile31.close();
+    output_inIntensity(INPUT.n_grid, "./tests/dl_inPhase_intensity.dat", 6, opt.ur, opt.ui);
+    output_inPhase(INPUT.n_grid, "./tests/dl_inPhase.dat", 6, opt.ph);
 
     delete[] opt.aznk;
     delete[] opt.eznk;
@@ -268,24 +219,7 @@ void OPT::numercial_diffraction(Input &INPUT, OPT &opt)
     hi = new double[INPUT.n_grid]();
 
     FFT::fft_initialize(INPUT.mm, INPUT.n_grid, fft);
-
-    ofstream outfile4;
-    outfile4.open("./tests/dl_fft_initialize.dat", ios::app);
-    outfile4.setf(ios::fixed, ios::floatfield);
-    outfile4.precision(6);
-    if (!outfile4.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile4 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile4 << endl;
-    }
-    outfile4.close();
+    output_inIntensity(INPUT.n_grid, "./tests/dl_fft_initialize.dat", 6, opt.ur, opt.ui);
 
     dxy0 = INPUT.aa0 / INPUT.n_grid;
     dxyz = INPUT.aaz / INPUT.n_grid;
@@ -300,170 +234,33 @@ void OPT::numercial_diffraction(Input &INPUT, OPT &opt)
 
 
     focusing(INPUT.n_grid, INPUT.n1, wave_number, dxy0, 1 / INPUT.zfh, opt.ur, opt.ui);
-
-    ofstream outfile5;
-    outfile5.open("./tests/dl_focusing.dat", ios::app);
-    outfile5.setf(ios::fixed, ios::floatfield);
-    outfile5.precision(6);
-    if (!outfile5.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile5 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile5 << endl;
-    }
-    outfile5.close();
+    output_inIntensity(INPUT.n_grid, "./tests/dl_focusing.dat", 6, opt.ur, opt.ui);
 
     mdfph(INPUT.n_grid, INPUT.n1, dxy0, dlta, 1, wave_number, opt.ur, opt.ui);
-
+    output_inIntensity(INPUT.n_grid, "./tests/dl_mdfph1.dat", 6, opt.ur, opt.ui);
     // cout << "dxy0" << dxy0 << "dlta" << dlta << "wave_number" << wave_number << endl;
-    ofstream outfile6;
-    outfile6.open("./tests/dl_mdfph1.dat", ios::app);
-    outfile6.setf(ios::fixed, ios::floatfield);
-    outfile6.precision(6);
-    if (!outfile6.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile6 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile6 << endl;
-    }
-    outfile6.close();
-
-    ofstream outfile61;
-    outfile61.open("./tests/dl_mdfph1_ur.dat", ios::app);
-    outfile61.setf(ios::fixed, ios::floatfield);
-    outfile61.precision(6);
-    if (!outfile61.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile61 << opt.ur[i][j] << '\t';
-        }
-        outfile61 << endl;
-    }
-    outfile61.close();
+    output_ur(INPUT.n_grid, "./tests/dl_mdfph1_ur.dat", 6, opt.ur);
 
     FFT::my_fft2d(fft, INPUT.n_grid, dxy0, 2, opt.ur, opt.ui);
-
-
-    ofstream outfile7;
-    outfile7.open("./tests/dl_my_fft2d1.dat", ios::app);
-    outfile7.setf(ios::fixed, ios::floatfield);
-    outfile7.precision(6);
-    if (!outfile7.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile7 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile7 << endl;
-    }
-    outfile7.close();
+    output_inIntensity(INPUT.n_grid, "./tests/dl_my_fft2d1.dat", 6, opt.ur, opt.ui);
 
 
     prop1(INPUT.n_grid, INPUT.n1, zzzz, wave_number, INPUT.aa0, hr, hi);
-
-    ofstream outfile8;
-    outfile8.open("./tests/dl_prop1.dat", ios::app);
-    outfile8.setf(ios::fixed, ios::floatfield);
-    outfile8.precision(6);
-    if (!outfile8.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile8 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile8 << endl;
-    }
-    outfile8.close();
-
+    output_inIntensity(INPUT.n_grid, "./tests/dl_prop1.dat", 6, opt.ur, opt.ui);
 
 
     evol1(INPUT.n_grid, hr, hi, opt.ur, opt.ui);
-
-    ofstream outfile9;
-    outfile9.open("./tests/dl_evol1.dat", ios::app);
-    outfile9.setf(ios::fixed, ios::floatfield);
-    outfile9.precision(6);
-    if (!outfile9.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile9 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile9 << endl;
-    }
-    outfile9.close();
-
+    output_inIntensity(INPUT.n_grid, "./tests/dl_evol1.dat", 6, opt.ur, opt.ui);
 
 
     FFT::my_fft2d(fft, INPUT.n_grid, dk0, -2, opt.ur, opt.ui);
+    output_inIntensity(INPUT.n_grid, "./tests/dl_my_fft2d2.dat", 6, opt.ur, opt.ui);
     // cout << "dxy0" << dxy0<< endl;
     // cout << "dk0" << dk0 << endl;
-    ofstream outfile10;
-    outfile10.open("./tests/dl_my_fft2d2.dat", ios::app);
-    outfile10.setf(ios::fixed, ios::floatfield);
-    outfile10.precision(6);
-    if (!outfile10.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile10 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile10 << endl;
-    }
-    outfile10.close();
 
-    mdfph(INPUT.n_grid, INPUT.n1, dxyz, dlta, ddxz, -1*wave_number, opt.ur, opt.ui);
 
-    ofstream outfile11;
-    outfile11.open("./tests/dl_mdfph2.dat", ios::app);
-    // outfile11.setf(ios::fixed, ios::floatfield);
-    // outfile11.precision(6);
-    if (!outfile11.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile11 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile11 << endl;
-    }
-    outfile11.close();
+    mdfph(INPUT.n_grid, INPUT.n1, dxyz, dlta, ddxz, -1 * wave_number, opt.ur, opt.ui);
+    output_inIntensity(INPUT.n_grid, "./tests/dl_mdfph2.dat", 6, opt.ur, opt.ui);
 
     pkkz = 1.0 / ddxz / ddxz;
     for (int j = 0; j < INPUT.n_grid; j++)
@@ -475,21 +272,5 @@ void OPT::numercial_diffraction(Input &INPUT, OPT &opt)
         }
     }
 
-    ofstream outfile12;
-    outfile12.open("./tests/dl_outIntensity.dat", ios::app);
-    // outfile12.setf(ios::fixed, ios::floatfield);
-    // outfile12.precision(6);
-    if (!outfile12.is_open())
-    {
-        cout << "open file failure" << endl;
-    }
-    for (int i = 0; i < INPUT.n_grid; i++)
-    {
-        for (int j = 0; j < INPUT.n_grid; j++)
-        {
-            outfile12 << pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2) << '\t';
-        }
-        outfile12 << endl;
-    }
-    outfile12.close();
+    output_inIntensity(INPUT.n_grid, "./tests/dl_outIntensity.dat", 6, opt.ur, opt.ui);
 }

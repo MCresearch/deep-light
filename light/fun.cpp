@@ -1,7 +1,13 @@
 #include "fun.h"
 #define PI 3.141592653589793
 
-void prop1(const int n_grid, const int n1, const double dz, const double kp, const double aa, double* hr, double* hi)
+void prop1(const int    n_grid,
+           const int    n1,
+           const double dz,
+           const double kp,
+           const double aa,
+           double*      hr,
+           double*      hi)
 {
     double tt = 0.0;
     double t0 = 0.0;
@@ -111,4 +117,94 @@ void focusing(const int    n_grid,
             ui[i - 1][j - 1] = c0 * s + ui[i - 1][j - 1] * c;
         }
     }
+}
+
+void output_inIntensity(const int    n_grid,
+                        const string path,
+                        const int    accuracy,
+                        double**     ur,
+                        double**     ui)
+{
+    ofstream outfile1;
+    outfile1.open(path, ios::app);
+    outfile1.setf(ios::fixed, ios::floatfield);
+    outfile1.precision(accuracy);
+    if (!outfile1.is_open())
+    {
+        cout << "open file failure" << endl;
+    }
+    for (int i = 0; i < n_grid; i++)
+    {
+        for (int j = 0; j < n_grid; j++)
+        {
+            outfile1 << pow(ur[i][j], 2) + pow(ui[i][j], 2) << '\t';
+        }
+        outfile1 << endl;
+    }
+    outfile1.close();
+}
+
+void output_zernike_coeff(const int     n_grid,
+                          const string  path,
+                          const int     accuracy,
+                          const int     maxZnkDim,
+                          const double* aznk,
+                          const int*    nznk,
+                          const double* eznk)
+{
+    ofstream outfile1;
+    outfile1.open(path, ios::app);
+    outfile1.setf(ios::fixed, ios::floatfield);
+    outfile1.precision(accuracy);
+    if (!outfile1.is_open())
+    {
+        cout << "open file failure" << endl;
+    }
+    for (int i = 1; i <= maxZnkDim; i++)
+    {
+        outfile1 << i << "\t" << aznk[i] << '\t' << nznk[i] << "\t" << eznk[i] << endl;
+    }
+    outfile1.close();
+}
+
+void output_inPhase(const int n_grid, const string path, const int accuracy, double** ph)
+{
+    ofstream outfile1;
+    outfile1.open(path, ios::app);
+    outfile1.setf(ios::fixed, ios::floatfield);
+    outfile1.precision(accuracy);
+    if (!outfile1.is_open())
+    {
+        cout << "open file failure" << endl;
+    }
+    for (int i = 0; i < n_grid; i++)
+    {
+        for (int j = 0; j < n_grid; j++)
+        {
+            outfile1 << ph[i][j] << '\t';
+        }
+        outfile1 << endl;
+    }
+    outfile1.close();
+}
+
+void output_ur(const int n_grid, const string path, const int accuracy, double** ur)
+{
+    ofstream outfile1;
+    outfile1.open(path, ios::app);
+    outfile1.setf(ios::fixed, ios::floatfield);
+    outfile1.precision(accuracy);
+    if (!outfile1.is_open())
+    {
+        cout << "open file failure" << endl;
+    }
+    for (int i = 0; i < n_grid; i++)
+    {
+        for (int j = 0; j < n_grid; j++)
+        {
+            outfile1 << ur[i][j] << '\t';
+        }
+        outfile1 << endl;
+    }
+    outfile1.close();
 }
