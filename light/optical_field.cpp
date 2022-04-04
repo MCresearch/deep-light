@@ -250,6 +250,8 @@ void OPT::numercial_diffraction(Input &INPUT, OPT &opt)
 
     FFT::my_fft2d(fft, INPUT.n_grid, dxy0, 2, opt.ur, opt.ui);
     output_inIntensity(INPUT.n_grid, "./tests/dl_my_fft2d1.dat", 6, opt.ur, opt.ui);
+    output_ur(INPUT.n_grid, "./tests/dl_my_fft2d1_ur.dat", 6, opt.ur);
+    output_ur(INPUT.n_grid, "./tests/dl_my_fft2d1_ui.dat", 6, opt.ui);
 
 
     prop1(INPUT.n_grid, INPUT.n1, zzzz, wave_number, INPUT.aa0, hr, hi);
