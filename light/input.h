@@ -33,6 +33,7 @@ public:
 
     double airy;  ///< airy = 1.22 * plm * zfh / (2 * a0)
     double xxz;   ///< Multiple of focal light field buffer area
+    double aaz;   ///< aaz = INPUT.airy * INPUT.xxz
     double dxyz;  ///< dxyz = aaz / n_grid
 
     int minZnkDim;    ///< Minimum order of a polynomial
@@ -42,6 +43,8 @@ public:
     double eeznk;  ///< Polynomial coefficient variance change index.
 
     bool INIT(Input &INPUT);
+
+    string Phase_option;
     /** Read in input parameters
     */
 };

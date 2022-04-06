@@ -29,6 +29,7 @@ Input::Input()  //
 
     rms = 0.0;
     eeznk = 0.0;
+    Phase_option = "";
 }
 
 Input::~Input() {}
@@ -101,6 +102,11 @@ bool Input::INIT(Input &INPUT)  //
         else if (strcmp(word3, "eeznk") == 0)
         {
             ifs >> INPUT.eeznk;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "Phase_option") == 0)
+        {
+            ifs >> INPUT.Phase_option;
             ifs.ignore(150, '\n');
         }
         else
@@ -215,6 +221,11 @@ bool Input::INIT(Input &INPUT)  //
     if (INPUT.eeznk == 0.0)
     {
         cout << "please input eeznk." << endl;
+        return false;
+    }
+    if (INPUT.Phase_option.empty())
+    {
+        cout << "please input Phase_option." << endl;
         return false;
     }
 
