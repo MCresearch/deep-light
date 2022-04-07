@@ -70,7 +70,7 @@ print(np.linalg.norm(diff_fft_in_km0,ord=2) )
 '''
 
 # fft2d
-'''
+
 fft_in_temp_xr1 = np.loadtxt(
     '/home/xianyuer/yuer/numerical_diffraction/mohan_tests/fft_in_temp_xr1.dat')
 dl_fft_in_temp_xr1 = np.loadtxt(
@@ -107,7 +107,7 @@ plt.figure(1, dpi=300)
 plt.contourf(dl_fft_in_temp_xi1)
 plt.savefig("dl_fft_in_temp_xi1.png")
 plt.close()
-'''
+
 
 fft_in_temp_cr1 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/fft_in_temp_cr1.dat')
 fft_in_temp_cr1 = np.delete(
@@ -116,7 +116,7 @@ fft_in_temp_cr1 = np.delete(
     fft_in_temp_cr1, [256, 257, 258, 259, 260, 261, 262, 263, 264], axis=0)
 dl_fft_in_temp_cr1 = np.loadtxt(
     'dl_fft_in_temp_cr1.dat')
-dl_fft_in_temp_cr1 = dl_fft_in_temp_cr1[256:]
+#dl_fft_in_temp_cr1 = dl_fft_in_temp_cr1[256:]
 diff_fft_in_temp_cr1 = fft_in_temp_cr1-dl_fft_in_temp_cr1
 print("fft_in_temp_cr1 的差为：")
 np.savetxt('fft_in_temp_cr1.txt', diff_fft_in_temp_cr1, delimiter=',')
@@ -140,7 +140,7 @@ fft_in_temp_ci1 = np.delete(
     fft_in_temp_ci1, [256, 257, 258, 259, 260, 261, 262, 263, 264], axis=0)
 dl_fft_in_temp_ci1 = np.loadtxt(
     'dl_fft_in_temp_ci1.dat')
-dl_fft_in_temp_ci1 = dl_fft_in_temp_ci1[256:]
+#dl_fft_in_temp_ci1 = dl_fft_in_temp_ci1[256:]
 diff_fft_in_temp_ci1 = fft_in_temp_ci1-dl_fft_in_temp_ci1
 print("fft_in_temp_ci1 的差为：")
 np.savetxt('fft_in_temp_ci1.txt', diff_fft_in_temp_ci1, delimiter=',')

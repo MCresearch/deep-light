@@ -290,10 +290,10 @@ void FFT::my_fft2d(const FFT&   fft,
     ofstream outfile122;
     ofstream outfile123;
     ofstream outfile124;
-    outfile121.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_cr1.dat", ios::app);
-    outfile122.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_ci1.dat", ios::app);
-    outfile123.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_xr1.dat", ios::app);
-    outfile124.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_xi1.dat", ios::app);
+    outfile121.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_cr1.dat", ios::ate);
+    outfile122.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_ci1.dat", ios::ate);
+    outfile123.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_xr1.dat", ios::ate);
+    outfile124.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_xi1.dat", ios::ate);
 
     outfile121.setf(ios::fixed, ios::floatfield);
     outfile121.precision(6);
