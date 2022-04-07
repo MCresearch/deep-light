@@ -30,6 +30,7 @@ Input::Input()  //
     rms = 0.0;
     eeznk = 0.0;
     Phase_option = "";
+    dir = "";
 }
 
 Input::~Input() {}
@@ -107,6 +108,11 @@ bool Input::INIT(Input &INPUT)  //
         else if (strcmp(word3, "Phase_option") == 0)
         {
             ifs >> INPUT.Phase_option;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "dir") == 0)
+        {
+            ifs >> INPUT.dir;
             ifs.ignore(150, '\n');
         }
         else
@@ -226,6 +232,11 @@ bool Input::INIT(Input &INPUT)  //
     if (INPUT.Phase_option.empty())
     {
         cout << "please input Phase_option." << endl;
+        return false;
+    }
+    if (INPUT.dir.empty())
+    {
+        cout << "please input dir." << endl;
         return false;
     }
 

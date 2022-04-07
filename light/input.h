@@ -45,6 +45,7 @@ public:
     bool INIT(Input &INPUT);
 
     string Phase_option;
+    string dir;
     /** Read in input parameters
     */
 };

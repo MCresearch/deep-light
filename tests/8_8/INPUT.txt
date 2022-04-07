@@ -1,4 +1,4 @@
-mm 8							number of grid-point = 2^mm  log2(number of grid-point)  log2(网格数)
+mm 6							number of grid-point = 2^mm  log2(number of grid-point)  log2(网格数)
 
 mgs 8							pow( , mgs) = pow( ,truncated beams) !'光束截断指数
 
@@ -17,3 +17,7 @@ maxZnkOrder 13				    maximum degree of polynomial!'多项式最大阶次（最�
 
 rms 1							Phase variance !'相位方差
 eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方差变化指数
+
+Phase_option confirm            add for "random" or "confirm"
+
+dir ./           path

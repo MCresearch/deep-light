@@ -1,6 +1,6 @@
 # documentation
 ## input parameters
-`mm`:   $mm = log_{2}(n_{grid})$.
+`mm`:   ![](http://latex.codecogs.com/gif.latex?\\mm = log_{2}(n_{grid}))$mm = log_{2}(n_{grid})$.
 
 `n_grid`: Number of grid-point. $n_{grid}= 2^{mm}$.
 

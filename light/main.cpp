@@ -28,7 +28,9 @@ int main()
     OPT::Init_Phase(INPUT, opt, a1, INPUT.Phase_option);  // add for "random" or "confirm"
 
     OPT::numercial_diffraction(INPUT, opt);
-
+    
+    cout << INPUT.mm<< endl;
+    
     // start time
     cout << "The current time is: " << (double)clock() << "s" << endl;
     // time

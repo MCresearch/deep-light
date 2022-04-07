@@ -19,3 +19,5 @@ rms 1							Phase variance !'相位方差
 eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方差变化指数
 
 Phase_option confirm            add for "random" or "confirm"
+
+dir ./            path

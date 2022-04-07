@@ -13,6 +13,7 @@ FFT::FFT() {}
 FFT::~FFT() {}
 bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
 {
+    cout << "1112" << endl;
     int    i = 0;
     int    ik = 0;
     int    ikk = 0;
@@ -28,6 +29,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     fft.kj = new int[mm]();       //???fortran is mm-1 注意是否正确
     fft.km0 = new int[n + 1]();   //???fortran is n
     fft.km = new int**[n + 1]();  //???fortran is n
+
     for (i = 0; i <= n; i++)
     {
         fft.km[i] = new int*[mm]();  //??? fortran km的第二个下标是从1开始的现在为0
@@ -44,8 +46,8 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     //**********************************************
     ofstream outfile1111;
     ofstream outfile1121;
-    outfile1111.open("./tests/dl_fft_in_kk0.dat", ios::app);
-    outfile1121.open("./tests/dl_fft_in_kj0.dat", ios::app);
+    outfile1111.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_kk0.dat", ios::app);
+    outfile1121.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_kj0.dat", ios::app);
     outfile1111.setf(ios::fixed, ios::floatfield);
     outfile1111.precision(6);
     outfile1121.setf(ios::fixed, ios::floatfield);
@@ -116,8 +118,8 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     //**********************************************
     ofstream outfile111;
     ofstream outfile112;
-    outfile111.open("./tests/dl_fft_in_kk.dat", ios::app);
-    outfile112.open("./tests/dl_fft_in_kj.dat", ios::app);
+    outfile111.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_kk.dat", ios::app);
+    outfile112.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_kj.dat", ios::app);
     outfile111.setf(ios::fixed, ios::floatfield);
     outfile111.precision(6);
     outfile112.setf(ios::fixed, ios::floatfield);
@@ -131,7 +133,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     outfile112.close();
     //***********************************************
     ofstream outfile113;
-    outfile113.open("./tests/dl_fft_in_km0.dat", ios::app);
+    outfile113.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_km0.dat", ios::app);
     outfile113.setf(ios::fixed, ios::floatfield);
     outfile113.precision(6);
 
@@ -143,8 +145,8 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     //*********************************************
     ofstream outfile114;
     ofstream outfile115;
-    outfile114.open("./tests/dl_fft_in_wr.dat", ios::app);
-    outfile115.open("./tests/dl_fft_in_wi.dat", ios::app);
+    outfile114.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_wr.dat", ios::app);
+    outfile115.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_wi.dat", ios::app);
     outfile114.setf(ios::fixed, ios::floatfield);
     outfile114.precision(6);
     outfile115.setf(ios::fixed, ios::floatfield);
@@ -160,9 +162,9 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     ofstream outfile116;
     ofstream outfile117;
     ofstream outfile118;
-    outfile116.open("./tests/dl_fft_in_km_0.dat", ios::app);
-    outfile117.open("./tests/dl_fft_in_km_1.dat", ios::app);
-    outfile118.open("./tests/dl_fft_in_km_2.dat", ios::app);
+    outfile116.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_km_0.dat", ios::app);
+    outfile117.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_km_1.dat", ios::app);
+    outfile118.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_km_2.dat", ios::app);
 
     outfile116.setf(ios::fixed, ios::floatfield);
     outfile117.setf(ios::fixed, ios::floatfield);
@@ -190,7 +192,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     // cout << "km(100,4,3)" << fft.km[58][4][0] << endl;
 }
 
-void FFT::itoc(const int ik, const int mm, int *kk)
+void FFT::itoc(const int ik, const int mm, int* kk)
 {
     int m = 0;
     int ikk = 0;
@@ -203,7 +205,7 @@ void FFT::itoc(const int ik, const int mm, int *kk)
     }
 }
 
-int FFT::ctoi(const int *kk, const int mm)
+int FFT::ctoi(const int* kk, const int mm)
 {
     int m = 0;
     int ik = 0;
@@ -215,7 +217,12 @@ int FFT::ctoi(const int *kk, const int mm)
     return ik;
 }
 
-void FFT::my_fft2d(const FFT& fft, const int n9, const double dx, const int kt, double **xr, double **xi)
+void FFT::my_fft2d(const FFT&   fft,
+                   const int    n9,
+                   const double dx,
+                   const int    kt,
+                   double**     xr,
+                   double**     xi)
 {
     double   ar = 0.0;
     double   ai = 0.0;
@@ -231,49 +238,27 @@ void FFT::my_fft2d(const FFT& fft, const int n9, const double dx, const int kt, 
     int      j3 = 0;
     int      ks = 0;
     int      kf = 0;
-    int      m10 = 0;
-    int      n10 = 0;
-    int      m11 = 0;
-    int      n11 = 0;
-    int      m20 = 0;
     int      n20 = 0;
-    int      m21 = 0;
     int      n21 = 0;
+    int      m20 = 0;
+    int      m21 = 0;
 
 
-    temp_cr = new double*[n9 + 1]();  //???fortran 1 n9 now 0 n9-1
-    temp_ci = new double*[n9 + 1]();
+    temp_cr = new double*[n9]();  //???fortran 1 n9 now 0 n9-1
+    temp_ci = new double*[n9]();
 
-    /*
-      ofstream outfile1231;
-      ofstream outfile1241;
-
-      outfile1231.open("./tests/dl_fft_in_temp_xr10.dat", ios::app);
-      outfile1241.open("./tests/dl_fft_in_temp_xi10.dat", ios::app);
-
-      outfile1231.setf(ios::fixed, ios::floatfield);
-      outfile1231.precision(6);
-      outfile1241.setf(ios::fixed, ios::floatfield);
-      outfile1241.precision(6);
-
-      for(int i = 1; i <= n9 ; i++)
-      {
-          for(int j = 1; j <= n9; j++)
-          {
-              outfile1231 << xr[i-1][j-1] << "\t";
-              outfile1241 << xi[i-1][j-1] << "\t";
-          }
-          outfile1231 << endl;
-          outfile1241 << endl;
-
-      }
-      outfile1231.close();
-      outfile1241.close();
-      */
-    for (int i = 0; i <= n9; i++)
+    for (int i = 0; i < n9; i++)
     {
-        temp_cr[i] = new double[n9 + 1]();
-        temp_ci[i] = new double[n9 + 1]();
+        temp_cr[i] = new double[n9]();
+        temp_ci[i] = new double[n9]();
+    }
+    for (int i = 0; i < n9; i++)
+    {
+        for (int j = 0; j < n9; j++)
+        {
+            temp_cr[i][j] = 0;
+            temp_ci[i][j] = 0;
+        }
     }
     n1 = fft.n / 2;
 
@@ -283,77 +268,61 @@ void FFT::my_fft2d(const FFT& fft, const int n9, const double dx, const int kt, 
         for (int i = 0; i <= n1 - 1; i++)
         {
             i1 = i + n1;
-            
-            m10 = i + 1;
-            n10 = j + 1;
-            m11 = i1 + 1;
-            n11 = j1 + 1;
 
             m20 = fft.km0[i];
             n20 = fft.km0[j];
             m21 = fft.km0[i1];
             n21 = fft.km0[j1];
 
-            temp_cr[m10][n10] = xr[m20][n20];
-            temp_cr[m11][n10] = -xr[m21][n20];
-            temp_cr[m10][n11] = -xr[m20][n21];
-            temp_cr[m11][n11] = xr[m21][n21];
-            
-            temp_ci[m10][n10] = xi[m20][n20];
-            temp_ci[m11][n10] = -xi[m21][n20];
-            temp_ci[m10][n11] = -xi[m20][n21];
-            temp_ci[m11][n11] = xi[m21][n21];
+            temp_cr[i][j] = xr[m20][n20];
+            temp_cr[i1][j] = -xr[m21][n20];
+            temp_cr[i][j1] = -xr[m20][n21];
+            temp_cr[i1][j1] = xr[m21][n21];
+
+            temp_ci[i][j] = xi[m20][n20];
+            temp_ci[i1][j] = -xi[m21][n20];
+            temp_ci[i][j1] = -xi[m20][n21];
+            temp_ci[i1][j1] = xi[m21][n21];
         }
     }
-    //*********************************************
-    for (int i = 1; i <= n9; i++)
+
+    ofstream outfile121;
+    ofstream outfile122;
+    ofstream outfile123;
+    ofstream outfile124;
+    outfile121.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_cr1.dat", ios::app);
+    outfile122.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_ci1.dat", ios::app);
+    outfile123.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_xr1.dat", ios::app);
+    outfile124.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_temp_xi1.dat", ios::app);
+
+    outfile121.setf(ios::fixed, ios::floatfield);
+    outfile121.precision(6);
+    outfile122.setf(ios::fixed, ios::floatfield);
+    outfile122.precision(6);
+    outfile123.setf(ios::fixed, ios::floatfield);
+    outfile123.precision(6);
+    outfile124.setf(ios::fixed, ios::floatfield);
+    outfile124.precision(6);
+
+    for (int i = 0; i < n9; i++)
     {
-        for (int j = 1; j <= n9; j++)
+        for (int j = 0; j < n9; j++)
         {
-            cout << i << " " << j << " " << temp_cr[i][j] << ' ';
+            outfile121 << temp_cr[i][j] << "\t";
+            outfile122 << temp_ci[i][j] << "\t";
+            outfile123 << xr[i][j] << "\t";
+            outfile124 << xi[i][j] << "\t";
         }
-        cout << endl;
+        outfile121 << endl;
+        outfile122 << endl;
+        outfile123 << endl;
+        outfile124 << endl;
     }
-    cout << "n1" << n1 << endl;
-    /*
-        ofstream outfile121;
-        ofstream outfile122;
-        ofstream outfile123;
-        ofstream outfile124;
-        outfile121.open("./tests/dl_fft_in_temp_cr1.dat", ios::app);
-        outfile122.open("./tests/dl_fft_in_temp_ci1.dat", ios::app);
-        outfile123.open("./tests/dl_fft_in_temp_xr1.dat", ios::app);
-        outfile124.open("./tests/dl_fft_in_temp_xi1.dat", ios::app);
+    outfile121.close();
+    outfile122.close();
+    outfile123.close();
+    outfile124.close();
 
-        outfile121.setf(ios::fixed, ios::floatfield);
-        outfile121.precision(6);
-        outfile122.setf(ios::fixed, ios::floatfield);
-        outfile122.precision(6);
-        outfile123.setf(ios::fixed, ios::floatfield);
-        outfile123.precision(6);
-        outfile124.setf(ios::fixed, ios::floatfield);
-        outfile124.precision(6);
-
-        for(int i = 1; i <= n9 ; i++)
-        {
-            for(int j = 1; j <= n9; j++)
-            {
-                outfile121 << temp_cr[i][j] << "\t";
-                outfile122 << temp_ci[i][j] << "\t";
-                outfile123 << xr[i-1][j-1] << "\t";
-                outfile124 << xi[i-1][j-1] << "\t";
-            }
-            outfile121 << endl;
-            outfile122 << endl;
-            outfile123 << endl;
-            outfile124 << endl;
-
-        }
-        outfile121.close();
-        outfile122.close();
-        outfile123.close();
-        outfile124.close();
-        */
     //*********************************************
     if (kt > 0)
     {
