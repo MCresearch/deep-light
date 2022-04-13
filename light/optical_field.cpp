@@ -144,25 +144,6 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1, const string type)
                 if (r2 / a02 <= 1)
                 {
                     zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
-
-                    ofstream outfile22;
-                    outfile22.open("./tests/dl_zernike_cg.dat", ios::app);
-                    // outfile22.open("./tests/dl_x_y.dat", ios::app);
-                    outfile22.setf(ios::fixed, ios::floatfield);
-                    outfile22.precision(7);
-                    // outfile22 << i << "\t" << j << "\t" <<  x/INPUT.a0 << "\t" <<  y/INPUT.a0<<
-                    // endl;
-
-                    if (!outfile22.is_open())
-                    {
-                        cout << "./tests/open file failure" << endl;
-                    }
-                    for (int i = 1; i <= opt.maxZnkDim; i++)
-                    {
-                        outfile22 << i << "\t" << opt.pl[i] << endl;
-                    }
-                    outfile22.close();
-
                     opt.ph[i][j] = 0;
                     for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
                     {
@@ -207,14 +188,17 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, const double a1, const string type)
     delete[] opt.aznk;
     delete[] opt.eznk;
     delete[] opt.pl;
-    for (int i = 0; i < opt.maxZnkDim; i++)
+    for (int i = 0; i < INPUT.n_grid; i++)
+    {
         delete[] opt.ph[i];
+    }
     delete[] opt.ph;
 }
 
 
 void OPT::numercial_diffraction(Input &INPUT, OPT &opt)
 {
+    cout << "numercial_diffraction" << endl;
     double  dxy0 = 0.0;
     double  dxyz = 0.0;
     double  dlta = 0.0;

@@ -16,19 +16,22 @@ plt.savefig("inIntensity.png")
 plt.close()
 
 plt.figure(1, dpi = 300)
-plt.contourf(dl_inIntensity)
+plt.contourf(dl_idiff_inPhase = inPhase-dl_inPhase
+print("inPhase 的差为：")
+print(np.linalg.norm(diff_inPhase,ord=2) )
+nIntensity)
 plt.savefig("dl_inIntensity.png")
 plt.close()
 
 
-'''
+
 zernike_coeff = np.loadtxt('zernike_coeff.dat')
 dl_zernike_coeff = np.loadtxt('dl_zernike_coeff.dat')
 diff_zernike_coeff = zernike_coeff  - dl_zernike_coeff
 #print(diff_zernike_coeff)
 print("zernike_coeff 的差为：")
 print(np.linalg.norm(diff_zernike_coeff,ord=2))
-'''
+
 '''
 zernike_cg = np.loadtxt('zernike_cg.dat')
 dl_zernike_cg = np.loadtxt('dl_zernike_cg.dat')
@@ -51,18 +54,29 @@ print(np.linalg.norm(diff_zernike_cg,ord=2) )
 '''
 
 
-inPhase = np.loadtxt('inPhase.dat')
+inPhase = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/inPhase.dat')
 dl_inPhase = np.loadtxt('dl_inPhase.dat')
 diff_inPhase = inPhase-dl_inPhase
 print("inPhase 的差为：")
 print(np.linalg.norm(diff_inPhase,ord=2) )
 
+plt.figure(1, dpi = 300)
+plt.contourf(inPhase)
+plt.savefig("inPhase.png")
+plt.close()
 
-inPhase_intensity = np.loadtxt('inPhase_inIntensity.dat')
+plt.figure(1, dpi = 300)
+plt.contourf(dl_inPhase)
+plt.savefig("dl_inPhase.png")
+plt.close()
+
+'''
+inPhase_intensity = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/inPhase_inIntensity.dat')
 dl_inPhase_intensity = np.loadtxt('dl_inPhase_intensity.dat')
 diff_inPhase_intensity = inPhase_intensity-dl_inPhase_intensity
 print("inPhase_intensity 的差为：")
 print(np.linalg.norm(diff_inPhase_intensity,ord=2) )
+'''
 
 '''
 fft_initialize = np.loadtxt('fft_initialize.dat')
