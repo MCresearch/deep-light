@@ -24,16 +24,18 @@ int main()
 
     double a1 = 0.0;
 
-    a1 = 0.2391;                                 // seed
-    
-    OPT::Init_Phase(INPUT, opt, a1, INPUT.Phase_option);  // add for "random" or "confirm"
+    a1 = 0.2391;  // seed
+    for (int i = 0; i < 10; i++)
+    {
+        a1 = a1 + 1;
 
-  cout << "start" << endl;
-  
-    OPT::numercial_diffraction(INPUT, opt);
-    
-    cout << INPUT.mm<< endl;
-    
+        OPT::Init_Phase(INPUT, opt, a1, INPUT.Phase_option);  // add for "random" or "confirm"
+
+        OPT::numercial_diffraction(INPUT, a1, opt);
+    }
+
+
+
     // start time
     cout << "The current time is: " << (double)clock() << "s" << endl;
     // time

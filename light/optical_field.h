@@ -14,8 +14,8 @@ public:
 
 
     static bool Init_Intensity(Input& INPUT, OPT& opt);
-    static bool Init_Phase(Input& INPUT, OPT& opt, const double a1, const string type);
-    static void numercial_diffraction(Input& INPUT, OPT& opt);
+    static bool Init_Phase(Input& INPUT, OPT& opt, double a1, const string type);
+    static void numercial_diffraction(Input& INPUT, const double a1, OPT& opt);
 
     double** ur;         ///< The real part of the transformation
     double** ui;         ///< The imaginary part of the transformation

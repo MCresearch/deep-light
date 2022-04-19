@@ -16,7 +16,7 @@ plt.savefig("inIntensity.png")
 plt.close()
 
 plt.figure(1, dpi = 300)
-plt.contourf(dl_idiff_inPhase = inPhase-dl_inPhase
+plt.contourf(dl_idiff_inPhase = inPhase-dl_inPhase)
 print("inPhase 的差为：")
 print(np.linalg.norm(diff_inPhase,ord=2) )
 nIntensity)

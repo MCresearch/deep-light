@@ -34,8 +34,6 @@ void evol1(const int n_grid, const double* hr, const double* hi, double** ur, do
             ui[i - 1][j - 1] = cx * hi[i - 1] + ui[i - 1][j - 1] * hr[i - 1];
         }
     }
-    output_ur(n_grid,  "/home/xianyuer/yuer/num/tests/256_256/dl_evol1_ur11.dat", 6, ur);
-    output_ur(n_grid,  "/home/xianyuer/yuer/num/tests/256_256/dl_evol1_ui11.dat", 6, ui);
     
     for (int j = 1; j <= n_grid; j++)
     {
