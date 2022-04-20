@@ -18,6 +18,26 @@ maxZnkOrder 13				    maximum degree of polynomial!'多项式最大阶次（最�
 rms 1							Phase variance !'相位方差
 eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方差变化指数
 
-Phase_option random           add for "random" or "confirm"
+Phase_option random            add for "random" or "confirm"
 
-dir ./           path
+dir ./            path
+
+out_inIntensity 1
+
+out_zernike_coeff 1
+
+out_inPhase 1
+
+out_focusing 1
+
+out_mdfph1 1
+
+out_my_fft2d1 1
+
+out_evol1 1
+
+out_my_fft2d2 1
+
+out_mdfph2 1
+
+out_outIntensity 1
