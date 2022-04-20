@@ -4,33 +4,32 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-inIntensity = np.loadtxt('inIntensity.dat')
-dl_inIntensity = np.loadtxt('dl_inIntensity.dat')
+inIntensity = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/inIntensity.dat',comments='#')
+dl_inIntensity = np.loadtxt('dl_inIntensity.dat',comments='#')
 diff_inIntensity = inIntensity-dl_inIntensity
 print("inIntensity 的差为：")
 print(np.linalg.norm(diff_inIntensity,ord=2) )
 
 plt.figure(1, dpi = 300)
 plt.contourf(inIntensity)
-plt.savefig("inIntensity.png")
+plt.savefig("./pictures/inIntensity.png")
 plt.close()
 
 plt.figure(1, dpi = 300)
-plt.contourf(dl_idiff_inPhase = inPhase-dl_inPhase)
-print("inPhase 的差为：")
-print(np.linalg.norm(diff_inPhase,ord=2) )
-nIntensity)
-plt.savefig("dl_inIntensity.png")
+plt.contourf(dl_inIntensity)
+plt.savefig("./pictures/dl_inIntensity.png")
 plt.close()
 
 
-
-zernike_coeff = np.loadtxt('zernike_coeff.dat')
-dl_zernike_coeff = np.loadtxt('dl_zernike_coeff.dat')
+'''
+zernike_coeff = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/zernike_coeff.dat')
+dl_zernike_coeff = np.loadtxt('dl_zernike_coeff_1.239100.dat',comments='#')
 diff_zernike_coeff = zernike_coeff  - dl_zernike_coeff
 #print(diff_zernike_coeff)
 print("zernike_coeff 的差为：")
 print(np.linalg.norm(diff_zernike_coeff,ord=2))
+'''
+
 
 '''
 zernike_cg = np.loadtxt('zernike_cg.dat')
@@ -55,7 +54,7 @@ print(np.linalg.norm(diff_zernike_cg,ord=2) )
 
 
 inPhase = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/inPhase.dat')
-dl_inPhase = np.loadtxt('dl_inPhase.dat')
+dl_inPhase = np.loadtxt('dl_inPhase_1.239100.dat',comments='#')
 diff_inPhase = inPhase-dl_inPhase
 print("inPhase 的差为：")
 print(np.linalg.norm(diff_inPhase,ord=2) )
@@ -333,6 +332,7 @@ plt.figure(1, dpi = 300)
 plt.contourf(dl_outIntensity)
 plt.savefig("dl_outIntensity.png")
 plt.close()
+
 
 
 

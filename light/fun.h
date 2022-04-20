@@ -91,3 +91,4 @@ void output_zernike_coeff(const int     n_grid,
                           const double* eznk);
 void output_inPhase(const int n_grid, const string path, const int accuracy, double** ph);
 void output_ur(const int n_grid, const string path, const int accuracy, double** ur);
+void output_ui(const int n_grid, const string path, const int accuracy, double** ui);

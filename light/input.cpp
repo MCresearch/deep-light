@@ -1,6 +1,6 @@
 #include "input.h"
 
-//Input INPUT;
+// Input INPUT;
 
 Input::Input()  //
 {
@@ -31,6 +31,17 @@ Input::Input()  //
     eeznk = 0.0;
     Phase_option = "";
     dir = "";
+
+    out_inIntensity = -1;
+    out_zernike_coeff = -1;
+    out_inPhase = -1;
+    out_focusing = -1;
+    out_mdfph1 = -1;
+    out_my_fft2d1 = -1;
+    out_evol1 = -1;
+    out_my_fft2d2 = -1;
+    out_mdfph2 = -1;
+    out_outIntensity = -1;
 }
 
 Input::~Input() {}
@@ -113,6 +124,56 @@ bool Input::INIT(Input &INPUT)  //
         else if (strcmp(word3, "dir") == 0)
         {
             ifs >> INPUT.dir;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_inIntensity") == 0)
+        {
+            ifs >> INPUT.out_inIntensity;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_zernike_coeff") == 0)
+        {
+            ifs >> INPUT.out_zernike_coeff;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_inPhase") == 0)
+        {
+            ifs >> INPUT.out_inPhase;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_focusing") == 0)
+        {
+            ifs >> INPUT.out_focusing;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_mdfph1") == 0)
+        {
+            ifs >> INPUT.out_mdfph1;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_my_fft2d1") == 0)
+        {
+            ifs >> INPUT.out_my_fft2d1;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_evol1") == 0)
+        {
+            ifs >> INPUT.out_evol1;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_my_fft2d2") == 0)
+        {
+            ifs >> INPUT.out_my_fft2d2;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_mdfph2") == 0)
+        {
+            ifs >> INPUT.out_mdfph2;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "out_outIntensity") == 0)
+        {
+            ifs >> INPUT.out_outIntensity;
             ifs.ignore(150, '\n');
         }
         else
@@ -239,6 +300,55 @@ bool Input::INIT(Input &INPUT)  //
         cout << "please input dir." << endl;
         return false;
     }
-
+    if (INPUT.out_inIntensity == -1)
+    {
+        cout << "please input out_inIntensity." << endl;
+        return false;
+    }
+    if (INPUT.out_zernike_coeff == -1)
+    {
+        cout << "please input out_zernike_coeff ." << endl;
+        return false;
+    }
+    if (INPUT.out_inPhase == -1)
+    {
+        cout << "please input out_inPhase  ." << endl;
+        return false;
+    }
+    if (INPUT.out_focusing == -1)
+    {
+        cout << "please input out_focusing  ." << endl;
+        return false;
+    }
+    if (INPUT.out_mdfph1 == -1)
+    {
+        cout << "please input out_mdfph1  ." << endl;
+        return false;
+    }
+    if (INPUT.out_my_fft2d1 == -1)
+    {
+        cout << "please input out_my_fft2d1  ." << endl;
+        return false;
+    }
+    if (INPUT.out_evol1 == -1)
+    {
+        cout << "please input out_evol1   ." << endl;
+        return false;
+    }
+    if (INPUT.out_my_fft2d2 == -1)
+    {
+        cout << "please input out_my_fft2d2   ." << endl;
+        return false;
+    }
+    if (INPUT.out_mdfph2 == -1)
+    {
+        cout << "please input out_mdfph2    ." << endl;
+        return false;
+    }
+    if (INPUT.out_outIntensity == -1)
+    {
+        cout << "please input out_outIntensity    ." << endl;
+        return false;
+    }
     return true;
 }

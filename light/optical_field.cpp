@@ -52,9 +52,12 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt)
         }
     }
     // save inIntensity
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur, opt.ui);
-    // output_ur(INPUT.n_grid, INPUT.dir+"dl_inIntensity_ur.dat", 6, opt.ur);
-    // output_ur(INPUT.n_grid, INPUT.dir+"dl_inIntensity_ui.dat", 6, opt.ui);
+    if (INPUT.out_inIntensity == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur, opt.ui);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ui);
+    }
 }
 
 
@@ -119,7 +122,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
         {
             rdmg = dis(random);
             rdm_gauss(a1, rdmg);
-           // cout << i << "\t" << rdmg << endl;
+            // cout << i << "\t" << rdmg << endl;
             opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
             opt.aznk[i] = rdmg * opt.eznk[i];
             // opt.aznk[i] = rdmg[i] * opt.eznk[i];
@@ -131,10 +134,11 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
         {
             opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
         }
-
-        output_zernike_coeff(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
-                             opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
-
+        if (INPUT.out_zernike_coeff == 1)
+        {
+            output_zernike_coeff(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
+                                 opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+        }
         ofstream outfile23;
         outfile23.open("./tests/dl_pl_aznk.dat", ios::app);
 
@@ -188,11 +192,14 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
         exit(0);
     }
 
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inPhase_intensity_" + str + ".dat", 6, opt.ur,
-                       opt.ui);
-    output_inPhase(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6, opt.ph);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_inPhase_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_inPhase_ui_" + str + ".dat", 6, opt.ui);
+    if (INPUT.out_inPhase == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+        // output_inPhase(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6, opt.ph);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6, opt.ui);
+    }
     delete[] opt.aznk;
     delete[] opt.eznk;
     delete[] opt.pl;
@@ -227,8 +234,8 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
     hi = new double[INPUT.n_grid]();
     cout << "111" << endl;
     FFT::fft_initialize(INPUT.mm, INPUT.n_grid, fft);
-    cout << "222" << endl;
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_fft_initialize.dat", 6, opt.ur, opt.ui);
+    // cout << "222" << endl;
+    // output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_fft_initialize.dat", 6, opt.ur, opt.ui);
 
     dxy0 = INPUT.aa0 / INPUT.n_grid;
     dxyz = INPUT.aaz / INPUT.n_grid;
@@ -240,27 +247,37 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
     zzzz = INPUT.zfh / (1 - dlta * INPUT.zfh);
     wave_number = 2 * PI / INPUT.plm;
 
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_ui_" + str + ".dat", 6, opt.ui);
+    // output_ur(INPUT.n_grid, INPUT.dir + "dl_ur_" + str + ".dat", 6, opt.ur);
+    // output_ur(INPUT.n_grid, INPUT.dir + "dl_ui_" + str + ".dat", 6, opt.ui);
 
     focusing(INPUT.n_grid, INPUT.n1, wave_number, dxy0, 1 / INPUT.zfh, opt.ur, opt.ui);
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat", 6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_focusing_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_focusing_ui_" + str + ".dat", 6, opt.ui);
-
+    if (INPUT.out_focusing == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat", 6, opt.ui);
+    }
     mdfph(INPUT.n_grid, INPUT.n1, dxy0, dlta, 1, wave_number, opt.ur, opt.ui);
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6, opt.ur, opt.ui);
-    // cout << "dxy0" << dxy0 << "dlta" << dlta << "wave_number" << wave_number << endl;
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_mdfph1_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_mdfph1_ui_" + str + ".dat", 6, opt.ui);
-
+    if (INPUT.out_mdfph1 == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+        // cout << "dxy0" << dxy0 << "dlta" << dlta << "wave_number" << wave_number << endl;
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6, opt.ui);
+    }
     FFT::my_fft2d(fft, INPUT.n_grid, dxy0, 2, opt.ur, opt.ui);
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat", 6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_ui_" + str + ".dat", 6, opt.ui);
-
+    if (INPUT.out_my_fft2d1 == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat", 6, opt.ui);
+    }
 
     prop1(INPUT.n_grid, INPUT.n1, zzzz, wave_number, INPUT.aa0, hr, hi);
+    /*
     ofstream outfile1;
     ofstream outfile2;
     outfile1.open(INPUT.dir + "dl_prop1_hr_" + str + ".dat", ios::app);
@@ -280,13 +297,16 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
     }
     outfile1.close();
     outfile2.close();
+    */
 
 
     evol1(INPUT.n_grid, hr, hi, opt.ur, opt.ui);
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_evol1_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_evol1_ui_" + str + ".dat", 6, opt.ui);
-
+    if (INPUT.out_evol1 == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6, opt.ur, opt.ui);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6, opt.ui);
+    }
 
     /*
      ifstream ifs1("/home/xianyuer/yuer/num/tests/evol1_ur.dat");
@@ -303,18 +323,22 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
   ifs2.close();
  */
     FFT::my_fft2d(fft, INPUT.n_grid, dk0, -2, opt.ur, opt.ui);
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_ur_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_ui_" + str + ".dat", 6, opt.ui);
-    // cout << "dxy0" << dxy0<< endl;
-    // cout << "dk0" << dk0 << endl;
-
+    if (INPUT.out_my_fft2d2 == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6, opt.ui);
+    }
 
     mdfph(INPUT.n_grid, INPUT.n1, dxyz, dlta, ddxz, -1 * wave_number, opt.ur, opt.ui);
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_mdfph2_" + str + ".dat", 6, opt.ur);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_mdfph2_" + str + ".dat", 6, opt.ui);
-
+    if (INPUT.out_mdfph2 == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ur);
+        output_ui(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ui);
+    }
     pkkz = 1.0 / ddxz / ddxz;
     for (int j = 0; j < INPUT.n_grid; j++)
     {
@@ -324,6 +348,9 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
             opt.ui[i][j] = opt.ui[i][j] / ddxz;
         }
     }
-
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_outIntensity_" + str + ".dat", 6, opt.ur, opt.ui);
+    if (INPUT.out_outIntensity == 1)
+    {
+        output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_outIntensity_" + str + ".dat", 6, opt.ur,
+                           opt.ui);
+    }
 }

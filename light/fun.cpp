@@ -34,14 +34,14 @@ void evol1(const int n_grid, const double* hr, const double* hi, double** ur, do
             ui[i - 1][j - 1] = cx * hi[i - 1] + ui[i - 1][j - 1] * hr[i - 1];
         }
     }
-    
+
     for (int j = 1; j <= n_grid; j++)
     {
         for (int i = 1; i <= n_grid; i++)
         {
             cx = ur[i - 1][j - 1];
             ur[i - 1][j - 1] = cx * hr[j - 1] - ui[i - 1][j - 1] * hi[j - 1];
-            ui[i - 1][j - 1] = cx * hi[j - 1] + ui[i - 1][j - 1] * hr[j- 1];
+            ui[i - 1][j - 1] = cx * hi[j - 1] + ui[i - 1][j - 1] * hr[j - 1];
         }
     }
 }
@@ -133,6 +133,7 @@ void output_inIntensity(const int    n_grid,
     {
         cout << "open file failure" << endl;
     }
+    outfile1 << "#output_inIntensity" << endl;
     for (int i = 0; i < n_grid; i++)
     {
         for (int j = 0; j < n_grid; j++)
@@ -160,6 +161,7 @@ void output_zernike_coeff(const int     n_grid,
     {
         cout << "open file failure" << endl;
     }
+    outfile1 << "#output_zernike_coeff" << endl;
     for (int i = 1; i <= maxZnkDim; i++)
     {
         outfile1 << i << "\t" << aznk[i] << '\t' << nznk[i] << "\t" << eznk[i] << endl;
@@ -177,6 +179,7 @@ void output_inPhase(const int n_grid, const string path, const int accuracy, dou
     {
         cout << "open file failure" << endl;
     }
+    outfile1 << "#output_inPhase" << endl;
     for (int i = 0; i < n_grid; i++)
     {
         for (int j = 0; j < n_grid; j++)
@@ -198,11 +201,34 @@ void output_ur(const int n_grid, const string path, const int accuracy, double**
     {
         cout << "open file failure" << endl;
     }
+    outfile1 << "#output_ur" << endl;
     for (int i = 0; i < n_grid; i++)
     {
         for (int j = 0; j < n_grid; j++)
         {
             outfile1 << ur[i][j] << '\t';
+        }
+        outfile1 << endl;
+    }
+    outfile1.close();
+}
+
+void output_ui(const int n_grid, const string path, const int accuracy, double** ui)
+{
+    ofstream outfile1;
+    outfile1.open(path, ios::app);
+    outfile1.setf(ios::fixed, ios::floatfield);
+    outfile1.precision(accuracy);
+    if (!outfile1.is_open())
+    {
+        cout << "open file failure" << endl;
+    }
+    outfile1 << "#output_ui" << endl;
+    for (int i = 0; i < n_grid; i++)
+    {
+        for (int j = 0; j < n_grid; j++)
+        {
+            outfile1 << ui[i][j] << '\t';
         }
         outfile1 << endl;
     }

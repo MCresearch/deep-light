@@ -25,7 +25,7 @@ int main()
     double a1 = 0.0;
 
     a1 = 0.2391;  // seed
-    for (int i = 0; i < 10; i++)
+    for (int i = 0; i < 1; i++)
     {
         a1 = a1 + 1;
 

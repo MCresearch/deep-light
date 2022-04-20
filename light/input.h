@@ -47,7 +47,17 @@ public:
     string Phase_option;
     string dir;
     /** Read in input parameters
-    */
+     */
+    int out_inIntensity;
+    int out_zernike_coeff;
+    int out_inPhase;
+    int out_focusing;
+    int out_mdfph1;
+    int out_my_fft2d1;
+    int out_evol1;
+    int out_my_fft2d2;
+    int out_mdfph2;
+    int out_outIntensity;
 };
 
 // extern Input INPUT;
