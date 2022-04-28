@@ -120,7 +120,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
         double rdmg = 0;
         for (int i = 3; i <= opt.maxZnkDim; i++)
         {
-            rdmg = dis(random);
+            //rdmg = dis(random);
             rdm_gauss(a1, rdmg);
             // cout << i << "\t" << rdmg << endl;
             opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);

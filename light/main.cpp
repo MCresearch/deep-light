@@ -8,6 +8,7 @@
 #include "input.h"
 #include "optical_field.h"
 #include <time.h>
+#include <random>
 
 int main()
 {
@@ -23,17 +24,16 @@ int main()
     OPT::Init_Intensity(INPUT, opt);
 
     double a1 = 0.0;
-
-    a1 = 0.2391;  // seed
-    for (int i = 0; i < 1; i++)
+    default_random_engine            random(a1);
+    std::normal_distribution<double> dis(0, 1);
+    for (int i = 0; i < INPUT.num_datas; i++)
     {
-        a1 = a1 + 1;
-
+        
+        a1 = dis(random);
         OPT::Init_Phase(INPUT, opt, a1, INPUT.Phase_option);  // add for "random" or "confirm"
 
         OPT::numercial_diffraction(INPUT, a1, opt);
     }
-
 
 
     // start time

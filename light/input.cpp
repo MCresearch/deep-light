@@ -32,6 +32,8 @@ Input::Input()  //
     Phase_option = "";
     dir = "";
 
+    num_datas = 0;
+
     out_inIntensity = -1;
     out_zernike_coeff = -1;
     out_inPhase = -1;
@@ -124,6 +126,11 @@ bool Input::INIT(Input &INPUT)  //
         else if (strcmp(word3, "dir") == 0)
         {
             ifs >> INPUT.dir;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "num_datas") == 0)
+        {
+            ifs >> INPUT.num_datas;
             ifs.ignore(150, '\n');
         }
         else if (strcmp(word3, "out_inIntensity") == 0)
@@ -298,6 +305,11 @@ bool Input::INIT(Input &INPUT)  //
     if (INPUT.dir.empty())
     {
         cout << "please input dir." << endl;
+        return false;
+    }
+    if (INPUT.num_datas == 0)
+    {
+        cout << "please input num_datas." << endl;
         return false;
     }
     if (INPUT.out_inIntensity == -1)

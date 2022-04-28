@@ -1,6 +1,6 @@
 # documentation
 ## input parameters
-`mm`:   ![](http://latex.codecogs.com/gif.latex?\\mm = log_{2}(n_{grid}))$mm = log_{2}(n_{grid})$.
+`mm`:   $mm = log_{2}(n_{grid}))$.
 
 `n_grid`: Number of grid-point. $n_{grid}= 2^{mm}$.
 
@@ -35,7 +35,33 @@
 
 `rms` : Phase variance.
 
-`eeznk` : Polynomial coefficient variance change index. !'多项式系数方差变化指数
+`eeznk` : Polynomial coefficient variance change index. 
+
+`Phase_option`: "random" phase or "confirm" determinate phase can be selected during phase initialization. 
+
+`dir`: path.
+
+`out_inIntensity`: "1" is output inIntensity, "0" is not output.
+
+`out_zernike_coeff`: "1" is output zernike_coeff, "0" is not output.
+
+`out_inPhase`: "1" is output inPhase, "0" is not output.
+
+`out_focusing`: "1" is output results after focus, "0" is not output.
+
+`out_mdfph1`: "1" is output results after mdfph1, "0" is not output.
+
+`out_my_fft2d1`: "1" is output results after my_fft2d1, "0" is not output.
+
+`out_evol1`: "1" is output results after evol1, "0" is not output.
+
+`out_my_fft2d2`: "1" is output results after my_fft2d2, "0" is not output.
+
+`out_mdfph2`: "1" is output results after mdfph2, "0" is not output.
+
+`out_outIntensity`: "1" is output outIntensity, "0" is not output.
+
+
 
 
 

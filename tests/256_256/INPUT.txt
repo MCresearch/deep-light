@@ -22,22 +22,24 @@ Phase_option random            add for "random" or "confirm"
 
 dir ./            path
 
+num_datas 100
+
 out_inIntensity 1
 
 out_zernike_coeff 1
 
-out_inPhase 1
+out_inPhase 0
 
-out_focusing 1
+out_focusing 0
 
-out_mdfph1 1
+out_mdfph1 0
 
-out_my_fft2d1 1
+out_my_fft2d1 0
 
-out_evol1 1
+out_evol1 0
 
-out_my_fft2d2 1
+out_my_fft2d2 0
 
-out_mdfph2 1
+out_mdfph2 0
 
 out_outIntensity 1
