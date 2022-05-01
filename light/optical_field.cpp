@@ -38,14 +38,14 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt)
 
     // set inIntensity
     a02 = INPUT.a0 * INPUT.a0;
-    for (int j = 0; j < INPUT.n_grid; j++)
+    for (int i = 0; i < INPUT.n_grid; i++)
     {
-        y = (j + 1 - INPUT.n1) * INPUT.dxy0;  // +不加1
-        y2 = y * y;
-        for (int i = 0; i < INPUT.n_grid; i++)
+        x = (i + 1 - INPUT.n1) * INPUT.dxy0;  // +不加1
+        x2 = x * x;
+        for (int j = 0; j < INPUT.n_grid; j++)
         {
-            x = (i + 1 - INPUT.n1) * INPUT.dxy0;
-            x2 = x * x;
+            y = (j + 1 - INPUT.n1) * INPUT.dxy0;
+            y2 = y * y;
             r2 = x2 + y2;
             opt.ur[i][j] = exp(-1 * pow(r2 / a02, INPUT.mgs));
             opt.ui[i][j] = 0;
@@ -139,18 +139,18 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
             output_zernike_coeff(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
                                  opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
         }
-        ofstream outfile23;
-        outfile23.open("./tests/dl_pl_aznk.dat", ios::app);
+        //ofstream outfile23;
+        //outfile23.open("./tests/dl_pl_aznk.dat", ios::app);
 
         //设置相位
-        for (int j = 0; j < INPUT.n_grid; j++)
+        for (int i = 0; i < INPUT.n_grid; i++)
         {
-            y = (j + 1 - INPUT.n1) * INPUT.dxy0;
-            y2 = y * y;
-            for (int i = 0; i < INPUT.n_grid; i++)
+            x = (i + 1 - INPUT.n1) * INPUT.dxy0;
+            x2 = x * x;
+            for (int j = 0; j < INPUT.n_grid; j++)
             {
-                x = (i + 1 - INPUT.n1) * INPUT.dxy0;
-                x2 = x * x;
+                y = (j + 1 - INPUT.n1) * INPUT.dxy0;
+                y2 = y * y;
                 r2 = x2 + y2;
                 if (r2 / a02 <= 1)
                 {
@@ -159,7 +159,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
                     for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
                     {
                         opt.ph[i][j] = opt.ph[i][j] + opt.pl[l] * opt.aznk[l];
-                        outfile23 << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
+                        //outfile23 << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
                     }
                     uri = opt.ur[i][j];
                     opt.ur[i][j] = uri * cos(opt.ph[i][j]);
@@ -167,13 +167,13 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
                 }
             }
         }
-        outfile23.close();
+        //outfile23.close();
     }
 
     else if (type == "confirm")
     {
         cout << "confirm" << endl;
-        ifstream ifs1("/home/xianyuer/yuer/num/tests/inPhase.dat");
+        ifstream ifs1(INPUT.dir + "inPhase.dat");
         for (int j = 0; j < INPUT.n_grid; j++)
         {
             for (int i = 0; i < INPUT.n_grid; i++)
@@ -340,9 +340,9 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
         output_ui(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ui);
     }
     pkkz = 1.0 / ddxz / ddxz;
-    for (int j = 0; j < INPUT.n_grid; j++)
+    for (int i = 0; i < INPUT.n_grid; i++)
     {
-        for (int i = 0; i < INPUT.n_grid; i++)
+        for (int j = 0; j < INPUT.n_grid; j++)
         {
             opt.ur[i][j] = opt.ur[i][j] / ddxz;
             opt.ui[i][j] = opt.ui[i][j] / ddxz;

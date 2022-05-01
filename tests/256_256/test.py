@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 
 inIntensity = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/inIntensity.dat',comments='#')
 dl_inIntensity = np.loadtxt('dl_inIntensity.dat',comments='#')
+dl_inIntensity = dl_inIntensity[0:256,]
 diff_inIntensity = inIntensity-dl_inIntensity
 print("inIntensity 的差为：")
 print(np.linalg.norm(diff_inIntensity,ord=2) )
@@ -23,13 +24,12 @@ plt.close()
 
 '''
 zernike_coeff = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/zernike_coeff.dat')
-dl_zernike_coeff = np.loadtxt('dl_zernike_coeff_1.239100.dat',comments='#')
+dl_zernike_coeff = np.loadtxt('dl_zernike_coeff_0.239100.dat',comments='#')
 diff_zernike_coeff = zernike_coeff  - dl_zernike_coeff
 #print(diff_zernike_coeff)
 print("zernike_coeff 的差为：")
 print(np.linalg.norm(diff_zernike_coeff,ord=2))
 '''
-
 
 '''
 zernike_cg = np.loadtxt('zernike_cg.dat')
@@ -53,8 +53,9 @@ print(np.linalg.norm(diff_zernike_cg,ord=2) )
 '''
 
 
-inPhase = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/inPhase.dat')
-dl_inPhase = np.loadtxt('dl_inPhase_1.239100.dat',comments='#')
+inPhase = np.loadtxt('inPhase_inIntensity.dat')
+dl_inPhase = np.loadtxt('dl_inPhase_0.239100.dat')
+dl_inPhase = dl_inPhase[0:256,]
 diff_inPhase = inPhase-dl_inPhase
 print("inPhase 的差为：")
 print(np.linalg.norm(diff_inPhase,ord=2) )
@@ -84,9 +85,13 @@ diff_fft_initialize = fft_initialize-dl_fft_initialize
 print("fft_initialize 的差为：")
 print(np.linalg.norm(diff_fft_initialize,ord=2) )
 '''
-'''
+
 focusing = np.loadtxt('focusing_inIntensity.dat')
-dl_focusing = np.loadtxt('dl_focusing.dat')
+dl_focusing = np.loadtxt('dl_focusing_0.239100.dat')
+dl_focusing_ur = dl_focusing[256:512,]
+dl_focusing_ui = dl_focusing[512:768,]
+dl_focusing = dl_focusing[0:256,]
+
 diff_focusing = focusing-dl_focusing
 print("focusing 的差为：")
 print(np.linalg.norm(diff_focusing,ord=2) )
@@ -103,7 +108,10 @@ plt.close()
 
 
 mdfph1 = np.loadtxt('mdfph1_inIntensity.dat')
-dl_mdfph1 = np.loadtxt('dl_mdfph1.dat')
+dl_mdfph1 = np.loadtxt('dl_mdfph1_0.239100.dat')
+dl_mdfph1_ur = dl_mdfph1[256:512,]
+dl_mdfph1_ui = dl_mdfph1[512:768,]
+dl_mdfph1 = dl_mdfph1[0:256,]
 diff_mdfph1 = mdfph1-dl_mdfph1
 print("mdfph1 的差为：")
 print(np.linalg.norm(diff_mdfph1,ord=2) )
@@ -122,9 +130,10 @@ plt.close()
 my_fft2d1 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/my_fft2d1_inIntensity.dat')
 my_fft2d1_ur = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/my_fft2d1_ur.dat')
 my_fft2d1_ui = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/my_fft2d1_ui.dat')
-dl_my_fft2d1 = np.loadtxt('dl_my_fft2d1.dat')
-dl_my_fft2d1_ur = np.loadtxt('dl_my_fft2d1_ur.dat')
-dl_my_fft2d1_ui = np.loadtxt('dl_my_fft2d1_ui.dat')
+dl_my_fft2d1 = np.loadtxt('dl_my_fft2d1_0.239100.dat')
+dl_my_fft2d1_ur = dl_my_fft2d1[256:512,]
+dl_my_fft2d1_ui = dl_my_fft2d1[512:768,]
+dl_my_fft2d1 = dl_my_fft2d1[0:256,]
 diff_my_fft2d1 = my_fft2d1 - dl_my_fft2d1
 diff_my_fft2d1_ur = my_fft2d1_ur - dl_my_fft2d1_ur
 diff_my_fft2d1_ui = my_fft2d1_ui - dl_my_fft2d1_ui
@@ -167,10 +176,6 @@ plt.close()
 
 
 
-dl_mdfph1_ur = np.loadtxt('dl_mdfph1_ur.dat')
-dl_mdfph1_ui = np.loadtxt('dl_mdfph1_ui.dat')
-dl_focusing_ur = np.loadtxt('dl_focusing_ur.dat')
-dl_focusing_ui = np.loadtxt('dl_focusing_ui.dat')
 
 plt.figure(1, dpi = 300)
 plt.contourf(dl_mdfph1_ur)
@@ -194,7 +199,7 @@ plt.close()
 
 
 
-
+'''
 prop1_hr = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/prop1_hr.dat')
 prop1_hi = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/prop1_hi.dat')
 dl_prop1_hr = np.loadtxt('dl_prop1_hr.dat')
@@ -227,28 +232,19 @@ plt.close()
 evol1 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/evol1_inIntensity.dat')
 evol1_ur = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/evol1_ur.dat')
 evol1_ui = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/evol1_ui.dat')
-evol1_ur11 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/evol1_ur11.dat')
-evol1_ui11 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/evol1_ui11.dat')
-dl_evol1 = np.loadtxt('dl_evol1.dat')
-dl_evol1_ur = np.loadtxt('dl_evol1_ur.dat')
-dl_evol1_ui = np.loadtxt('dl_evol1_ui.dat')
-dl_evol1_ur11 = np.loadtxt('dl_evol1_ur11.dat')
-dl_evol1_ui11 = np.loadtxt('dl_evol1_ui11.dat')
+dl_evol1 = np.loadtxt('dl_evol1_0.239100.dat')
+dl_evol1_ur = dl_evol1[256:512,]
+dl_evol1_ui = dl_evol1[512:768,]
+dl_evol1 = dl_evol1[0:256,]
 diff_evol1 = evol1-dl_evol1
 diff_evol1_ur = evol1_ur-dl_evol1_ur
 diff_evol1_ui = evol1_ui-dl_evol1_ui
-diff_evol1_ur11 = evol1_ur11-dl_evol1_ur11
-diff_evol1_ui11 = evol1_ui11-dl_evol1_ui11
 print("evol1 的差为：")
 print(np.linalg.norm(diff_evol1,ord=2) )
 print("evol1_ur 的差为：")
 print(np.linalg.norm(diff_evol1_ur,ord=2) )
 print("evol1_ui 的差为：")
 print(np.linalg.norm(diff_evol1_ui,ord=2) )
-print("evol1_ur11 的差为：")
-print(np.linalg.norm(diff_evol1_ur11,ord=2) )
-print("evol1_ui11 的差为：")
-print(np.linalg.norm(diff_evol1_ui11,ord=2) )
 
 
 plt.figure(1, dpi = 300)
@@ -271,30 +267,14 @@ plt.contourf(dl_evol1_ui)
 plt.savefig("dl_evol1_ui.png")
 plt.close()
 
-plt.figure(1, dpi = 300)
-plt.contourf(evol1_ur11)
-plt.savefig("evol1_ur11.png")
-plt.close()
-
-plt.figure(1, dpi = 300)
-plt.contourf(dl_evol1_ur11)
-plt.savefig("dl_evol1_ur11.png")
-plt.close()
-
-plt.figure(1, dpi = 300)
-plt.contourf(evol1_ui11)
-plt.savefig("evol1_ui11.png")
-plt.close()
-
-plt.figure(1, dpi = 300)
-plt.contourf(dl_evol1_ui11)
-plt.savefig("dl_evol1_ui11.png")
-plt.close()
 
 
 
 my_fft2d2 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/my_fft2d2_inIntensity.dat')
-dl_my_fft2d2= np.loadtxt('dl_my_fft2d2.dat')
+dl_my_fft2d2= np.loadtxt('dl_my_fft2d2_0.239100.dat')
+dl_my_fft2d2_ur = dl_my_fft2d2[256:512,]
+dl_my_fft2d2_ui = dl_my_fft2d2[512:768,]
+dl_my_fft2d2 = dl_my_fft2d2[0:256,]
 diff_my_fft2d2 = my_fft2d2-dl_my_fft2d2
 print("my_fft2d2 的差为：")
 print(np.linalg.norm(diff_my_fft2d2,ord=2) )
@@ -311,14 +291,18 @@ plt.close()
 
 
 mdfph2 = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/mdfph2_inIntensity.dat')
-dl_mdfph2 = np.loadtxt('dl_mdfph2.dat')
+dl_mdfph2 = np.loadtxt('dl_mdfph2_0.239100.dat')
+dl_mdfph2_ur = dl_mdfph2[256:512,]
+dl_mdfph2_ui = dl_mdfph2[512:768,]
+dl_mdfph2 = dl_mdfph2[0:256,]
 diff_mdfph2 = mdfph2-dl_mdfph2
 print("mdfph2 的差为：")
 print(np.linalg.norm(diff_mdfph2,ord=2) )
 
 
 outIntensity = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/outIntensity.dat')
-dl_outIntensity = np.loadtxt('dl_outIntensity.dat')
+dl_outIntensity = np.loadtxt('dl_outIntensity_0.239100.dat')
+dl_outIntensity = dl_outIntensity[0:256,]
 diff_outIntensity = outIntensity-dl_outIntensity
 print("outIntensity 的差为：")
 print(np.linalg.norm(diff_outIntensity,ord=2) )

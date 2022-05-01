@@ -24,12 +24,13 @@ int main()
     OPT::Init_Intensity(INPUT, opt);
 
     double a1 = 0.0;
-    default_random_engine            random(a1);
-    std::normal_distribution<double> dis(0, 1);
+    a1 = 0.2391;
+    //default_random_engine            random(a1);
+    //std::normal_distribution<double> dis(0, 1);
     for (int i = 0; i < INPUT.num_datas; i++)
     {
         
-        a1 = dis(random);
+        //a1 = dis(random);
         OPT::Init_Phase(INPUT, opt, a1, INPUT.Phase_option);  // add for "random" or "confirm"
 
         OPT::numercial_diffraction(INPUT, a1, opt);

@@ -13,7 +13,6 @@ FFT::FFT() {}
 FFT::~FFT() {}
 bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
 {
-    cout << "1112" << endl;
     int    i = 0;
     int    ik = 0;
     int    ikk = 0;
@@ -43,7 +42,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     fft.mm = mm;
     fft.n = n;
 
-    //**********************************************
+    /*
     ofstream outfile1111;
     ofstream outfile1121;
     outfile1111.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_kk0.dat", ios::app);
@@ -52,7 +51,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     outfile1111.precision(6);
     outfile1121.setf(ios::fixed, ios::floatfield);
     outfile1121.precision(6);
-    //**********************************************
+    */
     for (ikk = 0; ikk <= n - 1; ikk++)
     {
         itoc(ikk, mm, fft.kk);
@@ -64,8 +63,8 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
         //**********************************************
         for (int i = 0; i <= mm - 1; i++)
         {
-            outfile1111 << ikk << "\t" << fft.kk[i] << endl;
-            outfile1121 << ikk << "\t" << fft.kj[i] << endl;
+            //outfile1111 << ikk << "\t" << fft.kk[i] << endl;
+            //outfile1121 << ikk << "\t" << fft.kj[i] << endl;
         }
         //**********************************************
         fft.km0[ikk] = ctoi(fft.kj, mm);
@@ -73,8 +72,8 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     }
 
     //**********************************************
-    outfile1111.close();
-    outfile1121.close();
+    //outfile1111.close();
+    //outfile1121.close();
     //***********************************************
 
     for (ks = 1; ks <= mm; ks++)
@@ -115,7 +114,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
         fft.wi[k] = sin((k - n) * pp);
     }
 
-    //**********************************************
+    /*
     ofstream outfile111;
     ofstream outfile112;
     outfile111.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_kk.dat", ios::app);
@@ -124,6 +123,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     outfile111.precision(6);
     outfile112.setf(ios::fixed, ios::floatfield);
     outfile112.precision(6);
+
     for (int i = 0; i <= mm - 1; i++)
     {
         outfile111 << fft.kk[i] << endl;
@@ -131,7 +131,8 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     }
     outfile111.close();
     outfile112.close();
-    //***********************************************
+    */
+   /*
     ofstream outfile113;
     outfile113.open("/home/xianyuer/yuer/num/tests/fft/dl_fft_in_km0.dat", ios::app);
     outfile113.setf(ios::fixed, ios::floatfield);
@@ -190,6 +191,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     outfile117.close();
     outfile118.close();
     // cout << "km(100,4,3)" << fft.km[58][4][0] << endl;
+    */
 }
 
 void FFT::itoc(const int ik, const int mm, int* kk)
@@ -285,7 +287,7 @@ void FFT::my_fft2d(const FFT&   fft,
             temp_ci[i1][j1] = xi[m21][n21];
         }
     }
-
+/*
     ofstream outfile121;
     ofstream outfile122;
     ofstream outfile123;
@@ -322,6 +324,7 @@ void FFT::my_fft2d(const FFT&   fft,
     outfile122.close();
     outfile123.close();
     outfile124.close();
+*/
 
     //*********************************************
     if (kt > 0)

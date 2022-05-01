@@ -2,7 +2,7 @@
 #define OPTICAL_FIELD
 
 #include "Zernike.h"
-#include "fft.h"
+#include "FFt.h"
 #include "fun.h"
 #include "input.h"
 
