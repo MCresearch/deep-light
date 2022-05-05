@@ -86,8 +86,8 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     cout << "maxZnkDim =" << opt.maxZnkDim << endl;
     opt.nznk = new int[opt.maxZnkDim]();
     opt.mznk = new int[opt.maxZnkDim]();
-    opt.lznk = new int[opt.maxZnkDim]();
-    nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk, opt.lznk);  // delete lznk?
+    //nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete lznk?
+    mnznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk); 
 
     opt.aznk = new double[opt.maxZnkDim]();
     opt.eznk = new double[opt.maxZnkDim]();
@@ -106,9 +106,9 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     }
     if (type == "random")
     {
-        default_random_engine            random(a1);
-        std::normal_distribution<double> dis(0, 1);
-        /*
+        //default_random_engine            random(a1);
+        //std::normal_distribution<double> dis(0, 1);
+        
         double   rdmg[200];
         ifstream ifs("rdmg.dat");
         for (int i = 3; i <= opt.maxZnkDim; i++)
@@ -116,16 +116,16 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
             ifs >> rdmg[i];
         }
         ifs.close();
-        */
-        double rdmg = 0;
+        
+        //double rdmg = 0;
         for (int i = 3; i <= opt.maxZnkDim; i++)
         {
             //rdmg = dis(random);
-            rdm_gauss(a1, rdmg);
+            //rdm_gauss(a1, rdmg);
             // cout << i << "\t" << rdmg << endl;
             opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
-            opt.aznk[i] = rdmg * opt.eznk[i];
-            // opt.aznk[i] = rdmg[i] * opt.eznk[i];
+           //opt.aznk[i] = rdmg * opt.eznk[i];
+            opt.aznk[i] = rdmg[i] * opt.eznk[i];
             ss = ss + pow(opt.aznk[i], 2);
         }
 
@@ -154,7 +154,9 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
                 r2 = x2 + y2;
                 if (r2 / a02 <= 1)
                 {
-                    zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
+                    //zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
+                    radial_polynomials(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.nznk,
+                                       opt.mznk, opt.pl);
                     opt.ph[i][j] = 0;
                     for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
                     {

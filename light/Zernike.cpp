@@ -43,10 +43,9 @@ int maxZernike(const int nk)
         }
     }
     return l;
-    // 可加输出!write(11, *)nk, maxzernike
 }
 
-void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk, int *&lznk)
+void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk)
 {
     int    maxZernike = 0;
     double fac1 = 0;
@@ -62,8 +61,6 @@ void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk, int *
     int    j = 0;
     int    nm = 0;
 
-    int lznk_a(int l, int ni);
-
     for (ni = 1; ni <= maxZnkOrder; ni++)
     {
         m0 = ni - 2 * (int)(ni / 2);
@@ -76,7 +73,8 @@ void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk, int *
                 nznk[l] = ni;  // zernike系数从1开始储存
                 mznk[l] = m;
                 lz = lznk_a(l, ni);
-                lznk[l] = lz;
+                // lznk[l] = lz;
+                cout << ni << m << lz << endl;
             }
             if (m != 0)
             {
@@ -86,18 +84,99 @@ void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk, int *
                     nznk[l] = ni;  // zernike系数从1开始储存
                     mznk[l] = m;
                     lz = lznk_a(l, ni);
-                    lznk[l] = lz;
+                    // lznk[l] = lz;
                     nm = (ni - m) / 2;
+                    cout << ni << m << lz << endl;
                 }
             }
             if (l >= maxZnkDim)
             {
                 maxZnkDim = l;
-                goto outloop;
+                return;
             }
         }
     }
-outloop:;
+}
+
+void mnznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk)
+{
+    int n = 0;
+    int m = 0;
+    int j = 0;
+
+    for (n = 1; n <= maxZnkOrder; n++)
+    {
+        for (m = -n; m <= n; m = m + 2)
+        {
+            j = j + 1;
+            nznk[j] = n;
+            mznk[j] = m;
+            cout << nznk[j] << " " << mznk[j] << " " << endl;
+        }
+        maxZnkDim = j;
+    }
+}
+
+void radial_polynomials(const int    N,
+                        const double x,
+                        const double y,
+                        int *&       nznk,
+                        int *&       mznk,
+                        double *&    zer)
+{
+    double p = 0.0;
+    double c = 0.0;
+    if (x == 0)
+    {
+        cout << "x!=0" << endl;
+        exit(0);
+    }
+    cout << 111 << endl;
+    p = sqrt(x * x + y * y);
+    c = atan(y / x);
+    int i = 0;
+    int k = 0;
+    int n = 0;
+    int m = 0;
+    for (i = 0; i < N; i++)
+    {
+        cout << i << endl;
+        n = nznk[i];
+        m = mznk[i];
+        if (p == 1)
+        {
+            zer[i] = 1;
+        }
+        else
+        {
+            for (k = 0; k <= (n - m) / 2; k++)
+            {
+                zer[i] = zer[i] + pow(-1,k) * pow(p,n-2*k) * recv(n-k) / recv((n+m)/2-k) / recv((n-m)/2-k);
+            }
+        }
+        if(m >= 0)
+        {
+            zer[i] = zer[i] * cos(m * c);
+        }
+        else
+        {
+            zer[i] = zer[i] * sin(-1 * m * c);
+        }
+    }
+}
+// void radial_polynomials(int m, int n,)
+int recv(int n)
+{
+    int sum = 1;
+
+    if (1 == n)
+    {
+        return 1;
+    }
+
+    sum = n * recv(n - 1);
+
+    return sum;
 }
 
 int lznk_a(const int l, const int ni)
