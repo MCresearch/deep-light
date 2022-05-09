@@ -1,227 +1,19 @@
-#include "Zernike.h"
+//==================================================
+// Main function：The far-field transmission of focused beam is realized by fast
+// Fourier transform and coordinate adaptation transform. Date: 2022-02-14
+//==================================================
+#include <assert.h>
+#include <cstring>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
+#include <math.h>
+#include <random>
+#include <sstream>
+#include <string>
+#include <time.h>
 #define PI 3.141592653589793
-
-void rdm_gauss(double &a1, double &rdmg)
-{
-    double PI2 = 0.0;
-    double asd = 0.0;
-    double r01 = 0.0;
-    double r02 = 0.0;
-    double rq = 0.0;
-    PI2 = 2 * PI;
-    rq = pow(PI, (8 + PI)) + PI;
-
-    asd = a1;
-    asd = asd * rq;
-    asd = asd - (int)asd;
-    r01 = sqrt(-2 * log(asd));
-    asd = asd * rq;
-    asd = asd - (int)asd;
-    r02 = PI2 * asd;
-
-    rdmg = r01 * cos(r02);
-    a1 = asd;
-}
-
-int maxZernike(const int nk)
-{
-    int maxZernike = 0;
-    int l = 0;
-    int ni = 0;
-    int m0 = 0;
-    int m1 = 0;
-    int m = 0;
-    for (ni = 1; ni <= nk; ni++)
-    {
-        m0 = ni - 2 * (int)(ni / 2);
-        m1 = m0 + 2 * (int)(ni / 2);
-        for (m = m0; m <= m1; m = m + 2)
-        {
-            l = l + 1;
-            if (m != 0)
-                l++;
-        }
-    }
-    return l;
-}
-
-void nmlznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk)
-{
-    int maxZernike = 0;
-    int l = 0;
-    int ni = 0;
-    int m0 = 0;
-    int m1 = 0;
-    int m = 0;
-    // int    lz = 0;
-    int j = 0;
-    // int    nm = 0;
-
-    for (ni = 1; ni <= maxZnkOrder; ni++)
-    {
-        m0 = ni - 2 * (int)(ni / 2);
-        m1 = m0 + 2 * (int)(ni / 2);
-        for (m = m0; m <= m1; m = m + 2)
-        {
-            l = l + 1;
-            if (l >= 1)
-            {
-                nznk[l] = ni;  // zernike系数从1开始储存
-                mznk[l] = m;
-                // lz = lznk_a(l, ni);
-                // lznk[l] = lz;
-                // cout << ni << m << lz << endl;
-            }
-            if (m != 0)
-            {
-                l = l + 1;
-                if (l >= 1)
-                {
-                    nznk[l] = ni;  // zernike系数从1开始储存
-                    mznk[l] = m;
-                    // lz = lznk_a(l, ni);
-                    // lznk[l] = lz;
-                    // nm = (ni - m) / 2;
-                    // cout << ni << m << lz << endl;
-                }
-            }
-            if (l >= maxZnkDim)
-            {
-                maxZnkDim = l;
-                return;
-            }
-        }
-    }
-}
-
-void mnznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk)
-{
-    int n = 0;
-    int m = 0;
-    int j = 0;
-
-    for (n = 1; n <= maxZnkOrder; n++)
-    {
-        for (m = -n; m <= n; m = m + 2)
-        {
-            j = j + 1;
-            nznk[j] = n;
-            mznk[j] = m;
-            //cout << j << " " << nznk[j] << " " << mznk[j] << " " << endl;
-        }
-        maxZnkDim = j;
-    }
-}
-
-void radial_polynomials(const int    N,
-                        const double x,
-                        const double y,
-                        int *        nznk,
-                        int *        mznk,
-                        double *     zer)
-{
-    double r = 0.0;
-    double c = 0.0;
-    int    i = 0;
-
-    r = sqrt(x * x + y * y);
-    if (x != 0)
-    {
-        c = atan(y / x);
-    }
-    else
-    {
-        if (y >= 0)
-        {
-            c = PI / 2;
-        }
-        else
-        {
-            c = 3 * PI / 2;
-        }
-    }
-    int     n = 0;
-    int     m0 = 0;
-    int     m = 0;
-    double  m1 = 0;
-    double  m2 = 0;
-    double  m3 = 0;
-    double *pl;
-    pl = new double[N + 1]();
-    pl[0] = 1;
-    for (i = 1; i <= N; i++)
-    {
-        n = nznk[i];
-        m0 = mznk[i];
-        m = abs(m0);
-        if (m == n)
-            pl[i] = pow(r, n);
-        else if (m == n - 2)
-            pl[i] = n * pl[(n * (n + 2) - n) / 2] - (n - 1) * pl[((n - 2) * n + n - 2) / 2];
-        else
-        {
-            m1 = 4 * n * (n - 1) / ((n + m) + (n - m));
-            m2 = -1 * 2 * (n - 1) * (n * n - 2 * n + m * m) / ((m + n) * (m - n) * (n - 2));
-            m3 = -1 * n * (n + m - 2) * (n - m - 2) / ((n + m) * (n - m) * (n - 2));
-            pl[i] = (m1 * r * r + m2) * pl[((n - 2) * n + m) / 2] +
-                    m3 * pl[((n - 4) * (n - 2) + m) / 2];
-        }
-
-        if (m0 > 0)
-        {
-            zer[i] = pl[i] * cos(m * c);
-        }
-        else if (m0 < 0)
-        {
-            zer[i] = pl[i] * sin(m * c);
-        }
-        else
-        {
-            zer[i] = pl[i];
-        }
-    }
-}
-// void radial_polynomials(int m, int n,)
-double recv(int n)
-{
-    double sum = 1;
-    int    i = 0;
-    for (i = 1; i <= n; i++)
-    {
-        sum = sum * i;
-    }
-
-    return sum;
-}
-
-int lznk_a(const int l, const int ni)
-{
-    int lz = 0;
-    if ((ni / 2) / 2 != (ni / 2) * 0.5)
-    {
-        if (l / 2 == l * 0.5)
-        {
-            lz = 0;
-        }
-        else
-        {
-            lz = 1;
-        }
-    }
-    else
-    {
-        if (l / 2 == l * 0.5)
-        {
-            lz = 1;
-        }
-        else
-        {
-            lz = 0;
-        }
-    }
-    return lz;
-}
-
+using namespace std;
 void zernike_cg(const int N, const double x, const double y, double *&zer)
 {
     double r = 0;
@@ -531,4 +323,278 @@ void zernike_cg(const int N, const double x, const double y, double *&zer)
         if (ii == 104)
             zer[104] = sqrt(28.0) * s13;
     }
+}
+
+void mnznk(const int maxZnkOrder, int &maxZnkDim, int *&nznk, int *&mznk)
+{
+    int n = 0;
+    int m = 0;
+    int j = 0;
+
+    for (n = 1; n <= maxZnkOrder; n++)
+    {
+        for (m = -n; m <= n; m = m + 2)
+        {
+            j = j + 1;
+            nznk[j] = n;
+            mznk[j] = m;
+            // cout << j << " " << nznk[j] << " " << mznk[j] << " " << endl;
+        }
+        maxZnkDim = j;
+    }
+}
+
+double recv(int n)
+{
+    double sum = 1;
+    int    i = 0;
+    for (i = 1; i <= n; i++)
+    {
+        sum = sum * i;
+    }
+
+    return sum;
+}
+
+void zernike_formula(int     maxZnkOrder,
+                     int     minZnkDim,
+                     int     maxZnkDim,
+                     int *   nznk,
+                     int *   mznk,
+                     double *pl,
+                     double  x,
+                     double  y)
+{
+    int     m, l, jj;
+    double  c1, y2, x2, r, tm, af, phl, co, si;
+    double *cot;
+    double *sit;
+    double *rn;
+    cot = new double[maxZnkDim + 1];
+    sit = new double[maxZnkDim + 1];
+    rn = new double[maxZnkDim + 1];
+    y2 = y * y;
+    x2 = x * x;
+    r = sqrt(x2 + y2);
+    if (x != 0)
+    {
+        af = atan(y / x);
+    }
+    else
+    {
+        if (y >= 0)
+        {
+            af = PI / 2;
+        }
+        else
+        {
+            af = 3 * PI / 2;
+        }
+    }
+    rn[0] = 1;
+    for (m = 1; m <= maxZnkOrder; m++)
+    {
+        tm = m * af;
+        cot[m] = cos(tm);
+        sit[m] = sin(tm);
+        rn[m] = rn[m - 1] * r;
+    }
+    pl[0] = 1.0;
+    for (l = 1; l <= maxZnkDim; l++)
+    {
+        pl[l] = 0;
+        phl = 0;
+        for (jj = 0; jj <= (nznk[l] - abs(mznk[l])) / 2; jj++)
+        {
+            phl = phl + recv(jj) * rn[nznk[l] - 2 * jj];
+        }
+        if (mznk[l] == 0)
+        {
+            pl[l] = phl;
+            pl[l] = pl[l] * sqrt(nznk[l] + 1.0);
+        }
+        else
+        {
+            co = cot[abs(mznk[l])];
+            si = sit[abs(mznk[l])];
+            if (mznk[l] > 0)
+            {
+                pl[l] = phl * co;
+            }
+            else
+            {
+                pl[l] = phl * si;
+            }
+            pl[l] = pl[l] * sqrt(2 * (nznk[l] + 1.0));
+        }
+    }
+}
+
+
+
+void radial_polynomials(int N, double x, double y, int *nznk, int *mznk, double *zer)
+{
+    double r = 0.0;
+    double c = 0.0;
+    int    i = 0;
+    r = x;
+    c = y;
+
+    r = sqrt(x * x + y * y);
+    if (x != 0)
+    {
+        c = atan(y / x);
+    }
+    else
+    {
+        if (y >= 0)
+        {
+            c = PI / 2;
+        }
+        else
+        {
+            c = 3 * PI / 2;
+        }
+    }
+
+    int     n = 0;
+    int     m0 = 0;
+    int     m = 0;
+    double  m1 = 0;
+    double  m2 = 0;
+    double  m3 = 0;
+    double *pl;
+    pl = new double[N + 1]();
+    pl[0] = 1;
+    for (i = 1; i <= N; i++)
+    {
+        pl[i] = 0;
+    }
+
+    for (i = 1; i <= N; i++)
+    {
+        n = nznk[i];
+        m0 = mznk[i];
+        m = abs(m0);
+        // cout << x << " " << y << " " << n << " " << m0 << " " << r << " " << c << endl;
+        if (m == n)
+            pl[i] = pow(r, n);
+        else if (m == n - 2)
+            pl[i] = n * pl[(n * (n + 2) - n) / 2] - (n - 1) * pl[((n - 2) * n + n - 2) / 2];
+        else
+        {
+            m1 = 4 * n * (n - 1) / ((n + m) + (n - m));
+            m2 = -1 * 2 * (n - 1) * (n * n - 2 * n + m * m) / ((m + n) * (m - n) * (n - 2));
+            m3 = -1 * n * (n + m - 2) * (n - m - 2) / ((n + m) * (n - m) * (n - 2));
+            pl[i] = (m1 * r * r + m2) * pl[((n - 2) * n + m) / 2] +
+                    m3 * pl[((n - 4) * (n - 2) + m) / 2];
+        }
+
+        if (m0 > 0)
+        {
+            zer[i] = pl[i] * cos(m * c);
+        }
+        else if (m0 < 0)
+        {
+            zer[i] = pl[i] * sin(m * c);
+        }
+        else
+        {
+            zer[i] = pl[i];
+        }
+    }
+    delete[] pl;
+}
+
+int main()
+{
+    int      maxZnkDim = 0;
+    int *    nznk;
+    int *    mznk;
+    double **pl0;
+    double **pl1;
+    double **pl2;
+    int      i = 0;
+    int      j = 0;
+    int      n1 = 0;
+    pl0 = new double *[256]();
+    pl1 = new double *[256]();
+    pl2 = new double *[256]();
+    for (i = 0; i < 256; i++)
+    {
+        pl0[i] = new double[256]();
+        pl1[i] = new double[256]();
+        pl2[i] = new double[256]();
+    }
+    nznk = new int[105]();
+    mznk = new int[105]();
+    double  x = 0;
+    double  y = 0;
+    double  a0 = 0.3;
+    double  xx0 = 4;
+    double  aa0 = a0 * xx0;
+    double  dxy0 = aa0 / 256;
+    double *zer0;
+    zer0 = new double[105]();
+    double *zer1;
+    zer1 = new double[105]();
+    double *zer2;
+    zer2 = new double[105]();
+    // nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete lznk?
+    mnznk(13, maxZnkDim, nznk, mznk);
+    for (i = 1; i <= 104;i++)
+    {
+        cout << i << " " << nznk[i] << " " << mznk[i] << endl;
+    }
+        n1 = 256 / 2 + 1;
+    for (i = 0; i < 256; i++)
+    {
+        x = (i + 1 - n1) * dxy0;
+        for (j = 0; j < 256; j++)
+        {
+            y = (j + 1 - n1) * dxy0;
+            pl0[i][j] = 0;
+            pl1[i][j] = 0;
+            if (x * x + y * y <= a0 * a0)
+            {
+                zernike_cg(104, x / a0, y / a0, zer2);
+                zernike_formula(13, 1, 104, nznk, mznk, zer0, x / a0, y / a0);
+                radial_polynomials(104, x / a0, y / a0, nznk, mznk, zer1);
+                pl0[i][j] = zer0[12];
+                pl1[i][j] = zer1[12];
+                pl2[i][j] = zer2[12];
+            }
+        }
+    }
+    ofstream outfile0;
+    ofstream outfile1;
+    ofstream outfile2;
+    outfile0.open("p_0_pl1.dat", ios::ate);
+    outfile1.open("p_1_pl1.dat", ios::ate);
+    outfile2.open("p_2_pl1.dat", ios::ate);
+    outfile0.setf(ios::fixed, ios::floatfield);
+    outfile0.precision(6);
+    outfile1.setf(ios::fixed, ios::floatfield);
+    outfile1.precision(6);
+        outfile2.setf(ios::fixed, ios::floatfield);
+    outfile2.precision(6);
+    outfile0 << "#output_pl1" << endl;
+    outfile1 << "#output_pl1" << endl;
+        outfile2 << "#output_pl1" << endl;
+    for (int i = 0; i < 256; i++)
+    {
+        for (int j = 0; j < 256; j++)
+        {
+            outfile0 << pl0[i][j] << '\t';
+            outfile1 << pl1[i][j] << '\t';
+            outfile2 << pl2[i][j] << '\t';
+        }
+        outfile0 << endl;
+        outfile1 << endl;
+        outfile2 << endl;
+    }
+    outfile0.close();
+    outfile1.close();
+    outfile2.close();
+    cout << sqrt(2) << endl;
 }

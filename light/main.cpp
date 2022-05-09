@@ -14,6 +14,7 @@ int main()
 {
     cout << "111" << endl;
     Input INPUT;
+    cout << "aaa"<< recv(17) <<endl;
     if (!INPUT.INIT(INPUT))
     {
         cout << "input error!" << endl;
@@ -25,8 +26,8 @@ int main()
 
     double a1 = 0.0;
     a1 = 0.2391;
-    //default_random_engine            random(a1);
-    //std::normal_distribution<double> dis(0, 1);
+    default_random_engine            random(a1);
+    std::normal_distribution<double> dis(0, 1);
     for (int i = 0; i < INPUT.num_datas; i++)
     {
         

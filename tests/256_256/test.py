@@ -85,7 +85,7 @@ diff_fft_initialize = fft_initialize-dl_fft_initialize
 print("fft_initialize 的差为：")
 print(np.linalg.norm(diff_fft_initialize,ord=2) )
 '''
-
+'''
 focusing = np.loadtxt('focusing_inIntensity.dat')
 dl_focusing = np.loadtxt('dl_focusing_0.239100.dat')
 dl_focusing_ur = dl_focusing[256:512,]
@@ -298,7 +298,7 @@ dl_mdfph2 = dl_mdfph2[0:256,]
 diff_mdfph2 = mdfph2-dl_mdfph2
 print("mdfph2 的差为：")
 print(np.linalg.norm(diff_mdfph2,ord=2) )
-
+'''
 
 outIntensity = np.loadtxt('/home/xianyuer/yuer/numerical_diffraction/mohan_tests/outIntensity.dat')
 dl_outIntensity = np.loadtxt('dl_outIntensity_0.239100.dat')

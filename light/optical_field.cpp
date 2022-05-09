@@ -73,7 +73,6 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     double r2 = 0.0;
     double uri = 0.0;
     double ss = 0.0;
-    // double rdmg = 0.0;
     double a02 = 0.0;
 
     char buffer[20];
@@ -84,10 +83,10 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     // Phase
     opt.maxZnkDim = maxZernike(INPUT.maxZnkOrder);
     cout << "maxZnkDim =" << opt.maxZnkDim << endl;
-    opt.nznk = new int[opt.maxZnkDim]();
-    opt.mznk = new int[opt.maxZnkDim]();
-    //nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete lznk?
-    mnznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk); 
+    opt.nznk = new int[opt.maxZnkDim + 1]();
+    opt.mznk = new int[opt.maxZnkDim + 1]();
+    // nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete lznk?
+    mnznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);
 
     opt.aznk = new double[opt.maxZnkDim]();
     opt.eznk = new double[opt.maxZnkDim]();
@@ -106,9 +105,9 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     }
     if (type == "random")
     {
-        //default_random_engine            random(a1);
-        //std::normal_distribution<double> dis(0, 1);
-        
+        // default_random_engine            random(a1);
+        // std::normal_distribution<double> dis(0, 1);
+
         double   rdmg[200];
         ifstream ifs("rdmg.dat");
         for (int i = 3; i <= opt.maxZnkDim; i++)
@@ -116,15 +115,15 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
             ifs >> rdmg[i];
         }
         ifs.close();
-        
-        //double rdmg = 0;
+
+        // double rdmg = 0;
         for (int i = 3; i <= opt.maxZnkDim; i++)
         {
-            //rdmg = dis(random);
-            //rdm_gauss(a1, rdmg);
+            // rdmg = dis(random);
+            // rdm_gauss(a1, rdmg);
             // cout << i << "\t" << rdmg << endl;
             opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
-           //opt.aznk[i] = rdmg * opt.eznk[i];
+            // opt.aznk[i] = rdmg * opt.eznk[i];
             opt.aznk[i] = rdmg[i] * opt.eznk[i];
             ss = ss + pow(opt.aznk[i], 2);
         }
@@ -139,8 +138,8 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
             output_zernike_coeff(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
                                  opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
         }
-        //ofstream outfile23;
-        //outfile23.open("./tests/dl_pl_aznk.dat", ios::app);
+        // ofstream outfile23;
+        // outfile23.open("pl_aznk.dat", ios::app);
 
         //设置相位
         for (int i = 0; i < INPUT.n_grid; i++)
@@ -154,14 +153,13 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
                 r2 = x2 + y2;
                 if (r2 / a02 <= 1)
                 {
-                    //zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
-                    radial_polynomials(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.nznk,
-                                       opt.mznk, opt.pl);
+                    // zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
+                    radial_polynomials(opt.maxZnkDim, x, y, opt.nznk, opt.mznk, opt.pl);
                     opt.ph[i][j] = 0;
                     for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
                     {
                         opt.ph[i][j] = opt.ph[i][j] + opt.pl[l] * opt.aznk[l];
-                        //outfile23 << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
+                        // outfile23 << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
                     }
                     uri = opt.ur[i][j];
                     opt.ur[i][j] = uri * cos(opt.ph[i][j]);
@@ -169,9 +167,9 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
                 }
             }
         }
-        //outfile23.close();
+        // outfile23.close();
+        output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_" + str + ".dat", 6, opt.ph);
     }
-
     else if (type == "confirm")
     {
         cout << "confirm" << endl;
@@ -215,7 +213,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
 
 void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
 {
-    cout << "numercial_diffraction" << endl;
+    // cout << "numercial_diffraction" << endl;
     double  dxy0 = 0.0;
     double  dxyz = 0.0;
     double  dlta = 0.0;
