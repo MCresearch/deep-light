@@ -69,8 +69,8 @@ class my_callback(Callback):
         print("test loss is :{}".format(testLoss))
 
 ############# data and epoch specification #################
-intensity_dir = "/home/xianyuer/yuer/num_mechinelearning/tests/32_32/10000/dl_outIntensity.npy"
-zernike_dir = "/home/xianyuer/yuer/num_mechinelearning/tests/32_32//10000/dl_zernike_coeff.npy"
+intensity_dir = "/home/xianyuer/yuer/num_mechinelearning/deep-light/tests/32_32/10000/dl_outIntensity.npy"
+zernike_dir = "/home/xianyuer/yuer/num_mechinelearning//deep-light/tests/32_32/10000/dl_zernike_coeff.npy"
 #intensity_dir = "/home/lrx/work/10_MO2020/202103+05/intensity_20210305mix.npy"
 #zernike_dir = "/home/lrx/work/10_MO2020/202103+05/zernike_20210305mix.npy"
 for i in range(0, 3):

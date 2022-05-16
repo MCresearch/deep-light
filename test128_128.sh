@@ -3,14 +3,12 @@ cd tests
 cd 128_128/
 rm -f dl*
 rm -f *.exe
-cd /home/xianyuer/yuer/num/tests/fft/
-rm -f dl*
-cd /home/xianyuer/yuer/num/
+cd ../..
 make
-cp ./light.exe /home/xianyuer/yuer/num/tests/128_128/
-cd /home/xianyuer/yuer/num/tests/128_128/
+cp ./light.exe ./tests/128_128/
+cd ./tests/128_128/
 ./light.exe
 
-cd /home/xianyuer/yuer/num/
+cd ../..
 
 make clean

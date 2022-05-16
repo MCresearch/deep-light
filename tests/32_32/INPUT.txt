@@ -22,7 +22,7 @@ Phase_option random            add for "random" or "confirm"
 
 dir ./            path
 
-num_datas 1000
+num_datas 10000
 
 out_inIntensity 1
 

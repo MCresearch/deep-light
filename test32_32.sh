@@ -3,12 +3,12 @@ cd tests
 cd 32_32/
 rm -f dl*
 rm -f *.exe
-cd /home/xianyuer/yuer/num_mechinelearning/
+cd ../..
 make
-cp ./light.exe /home/xianyuer/yuer/num_mechinelearning/tests/32_32/
-cd /home/xianyuer/yuer/num_mechinelearning/tests/32_32/
+cp ./light.exe ./tests/32_32/
+cd ./tests/32_32/
 ./light.exe
 
-cd /home/xianyuer/yuer/num_mechinelearning/
+cd ../..
 
 make clean

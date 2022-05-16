@@ -19,8 +19,8 @@ input_model = False
 intensity = np.zeros((1000,32,32))
 zernike = np.zeros((1000,104))
 
-intensity_dir = "/home/xianyuer/yuer/num_mechinelearning/tests/32_32/dl_outIntensity.dat"
-zernike_dir = "/home/xianyuer/yuer/num_mechinelearning/tests/32_32/dl_zernike_coeff.dat"
+intensity_dir = "./dl_outIntensity.dat"
+zernike_dir = "./dl_zernike_coeff.dat"
 
 x = np.loadtxt(intensity_dir)
 zernike = np.loadtxt(zernike_dir)
