@@ -1,37 +1,46 @@
 //==================================================
-// Main function：The far-field transmission of focused beam is realized by fast Fourier transform and coordinate adaptation transform.
-// Date: 2022-02-14
+// Main function：The far-field transmission of focused beam is realized by fast
+// Fourier transform and coordinate adaptation transform. Date: 2022-02-14
 //==================================================
-#include "input.h"
-#include "fun.h"
+#include "FFt.h"
 #include "Zernike.h"
+#include "fun.h"
 #include "input.h"
 #include "optical_field.h"
-#include "FFt.h"
-#include<time.h>
-
+#include <time.h>
+#include <random>
 
 int main()
 {
-	cout << "111"<<endl;
-	if(!INPUT.INIT())
-	{
-		cout << "input error!" << endl;
-		exit(0); 
-	}
+    cout << "111" << endl;
+    Input INPUT;
+    cout << "aaa"<< recv(17) <<endl;
+    if (!INPUT.INIT(INPUT))
+    {
+        cout << "input error!" << endl;
+        exit(0);
+    }
 
-	OPT opt;
-	OPT::Init_Intensity(opt);
+    OPT opt;
+    OPT::Init_Intensity(INPUT, opt);
 
-	double a1 = 0.0;
-	a1 = 0.2391;		//随机数种子
-	OPT::Init_Phase(opt, a1); // 此处在之后可加入循环
-	OPT::numercial_diffraction(opt);
+    double a1 = 0.0;
+    a1 = 0.2391;
+    default_random_engine            random(a1);
+    std::uniform_real_distribution<double> dis(0.0, 1.0);
+    for (int i = 0; i < INPUT.num_datas; i++)
+    {
+        
+        a1 = dis(random);
+        OPT::Init_Phase(INPUT, opt, a1, INPUT.Phase_option);  // add for "random" or "confirm"
 
-	// 输出出结果时刻
-	cout << "The current time is: " <<(double)clock()<< "s" << endl;
-	// 输出运行时间; 
-	cout << "The run time is: " <<(double)clock() / CLOCKS_PER_SEC << "s" << endl;
-	return 0;
+        OPT::numercial_diffraction(INPUT, a1, opt);
+    }
+
+
+    // start time
+    cout << "The current time is: " << (double)clock() << "s" << endl;
+    // time
+    cout << "The run time is: " << (double)clock() / CLOCKS_PER_SEC << "s" << endl;
+    return 0;
 }
-
