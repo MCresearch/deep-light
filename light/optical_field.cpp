@@ -63,8 +63,8 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt)
         output_ur(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur0);
         output_ui(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ui0);
     }
+    return true;
 }
-
 
 bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
 {
@@ -110,13 +110,13 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     // nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete lznk?
     mnznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);
 
-    opt.aznk = new double[opt.maxZnkDim]();
+    opt.aznk = new double[opt.maxZnkDim+1]();
     opt.eznk = new double[opt.maxZnkDim]();
     opt.ph = new double *[INPUT.n_grid]();
-    opt.pl = new double[opt.maxZnkDim]();
+    opt.pl = new double[opt.maxZnkDim+1]();
 
 
-    for (int i = 0; i < opt.maxZnkDim; i++)
+    for (int i = 0; i <= opt.maxZnkDim; i++)
     {
         opt.pl[i] = 0;
     }
@@ -125,6 +125,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
     {
         opt.ph[i] = new double[INPUT.n_grid]();
     }
+
     if (type == "random")
     {
         default_random_engine            random(a1);
@@ -175,24 +176,30 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
                 y = (j + 1 - INPUT.n1) * INPUT.dxy0;
                 y2 = y * y;
                 r2 = x2 + y2;
+
+                //cout << i <<" "<< j <<" "<< endl;
+
                 if (r2 / a02 <= 1)
                 {
                     zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
                     // radial_polynomials(opt.maxZnkDim, x, y, opt.nznk, opt.mznk, opt.pl);
+                    //cout << i <<" "<< j <<" "<< endl;
                     opt.ph[i][j] = 0;
                     for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++)
                     {
                         opt.ph[i][j] = opt.ph[i][j] + opt.pl[l] * opt.aznk[l];
-                        // outfile23 << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
+                        //cout << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
                     }
+                    //cout << i<<" "<<j<<" "<<"12221" << endl;
                     uri = opt.ur0[i][j];
                     opt.ur[i][j] = uri * cos(opt.ph[i][j]);
                     opt.ui[i][j] = uri * sin(opt.ph[i][j]);
+                    //cout << i<<" "<<j<<" "<< "12222" << endl;
                 }
             }
         }
         // outfile23.close();
-        // output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_" + str + ".dat", 6, opt.ph);
+        //output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_" + str + ".dat", 6, opt.ph);
     }
     else if (type == "confirm")
     {
@@ -232,12 +239,13 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, const string type)
         delete[] opt.ph[i];
     }
     delete[] opt.ph;
+    return true;
 }
 
 
 void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
 {
-    // cout << "numercial_diffraction" << endl;
+    cout << "numercial_diffraction" << endl;
     double  dxy0 = 0.0;
     double  dxyz = 0.0;
     double  dlta = 0.0;
@@ -258,7 +266,7 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt)
     hi = new double[INPUT.n_grid]();
     cout << "111" << endl;
     FFT::fft_initialize(INPUT.mm, INPUT.n_grid, fft);
-    // cout << "222" << endl;
+    //cout << "222" << endl;
     // output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_fft_initialize.dat", 6, opt.ur, opt.ui);
 
     dxy0 = INPUT.aa0 / INPUT.n_grid;

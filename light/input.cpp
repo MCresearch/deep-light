@@ -307,57 +307,57 @@ bool Input::INIT(Input &INPUT)  //
         cout << "please input dir." << endl;
         return false;
     }
-    if (INPUT.num_datas == 0)
+    if (INPUT.num_datas <= 0)
     {
         cout << "please input num_datas." << endl;
         return false;
     }
-    if (INPUT.out_inIntensity == -1)
+    if (INPUT.out_inIntensity != 1 && INPUT.out_inIntensity != 0)
     {
         cout << "please input out_inIntensity." << endl;
         return false;
     }
-    if (INPUT.out_zernike_coeff == -1)
+    if (INPUT.out_zernike_coeff != 1 && INPUT.out_zernike_coeff != 0)
     {
         cout << "please input out_zernike_coeff ." << endl;
         return false;
     }
-    if (INPUT.out_inPhase == -1)
+    if (INPUT.out_inPhase != 1 && INPUT.out_inPhase != 0)
     {
         cout << "please input out_inPhase  ." << endl;
         return false;
     }
-    if (INPUT.out_focusing == -1)
+    if (INPUT.out_focusing != 1 && INPUT.out_focusing != 0)
     {
         cout << "please input out_focusing  ." << endl;
         return false;
     }
-    if (INPUT.out_mdfph1 == -1)
+    if (INPUT.out_mdfph1 != 1 && INPUT.out_mdfph1 != 0)
     {
         cout << "please input out_mdfph1  ." << endl;
         return false;
     }
-    if (INPUT.out_my_fft2d1 == -1)
+    if (INPUT.out_my_fft2d1 != 1 && INPUT.out_my_fft2d1 != 0)
     {
         cout << "please input out_my_fft2d1  ." << endl;
         return false;
     }
-    if (INPUT.out_evol1 == -1)
+    if (INPUT.out_evol1 != 1 && INPUT.out_evol1 != 0)
     {
         cout << "please input out_evol1   ." << endl;
         return false;
     }
-    if (INPUT.out_my_fft2d2 == -1)
+    if (INPUT.out_my_fft2d2 != 1 && INPUT.out_my_fft2d2 != 0)
     {
         cout << "please input out_my_fft2d2   ." << endl;
         return false;
     }
-    if (INPUT.out_mdfph2 == -1)
+    if (INPUT.out_mdfph2 != 1 && INPUT.out_mdfph2 != 0)
     {
         cout << "please input out_mdfph2    ." << endl;
         return false;
     }
-    if (INPUT.out_outIntensity == -1)
+    if (INPUT.out_outIntensity != 1 && INPUT.out_outIntensity != 0)
     {
         cout << "please input out_outIntensity    ." << endl;
         return false;

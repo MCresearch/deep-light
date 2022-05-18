@@ -1,0 +1,2 @@
+ #!/bin/bash
+ g++ optical_field_32_unittest.cc ../../light/optical_field.cpp ../../light/input.cpp ../../light/Zernike.cpp ../../light/FFt.cpp ../../light/fun.cpp -o optical_field  -I../../light/ -lgtest -lgtest_main -lpthread
