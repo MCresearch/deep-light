@@ -51,7 +51,7 @@ def Xception(
              input_shape=None,
              pooling=None,
              middle_loop=8, #renxi added 
-             outdim=104,
+             outdim=9,
              **kwargs):
     """Instantiates the Xception architecture.
 
@@ -193,31 +193,27 @@ def Xception(
 # end 256 block
 
 # 728 block
+    residual = layers.Conv2D(728, (1, 1),strides=(2, 2),padding='same',use_bias=False)(x)
+    residual = layers.BatchNormalization(axis=channel_axis)(residual)
 
-#    residual = layers.Conv2D(728, (1, 1),
-#                             strides=(2, 2),
-#                             padding='same',
-#                             use_bias=False)(x)
-#    residual = layers.BatchNormalization(axis=channel_axis)(residual)
-#
-#    x = layers.Activation('relu', name='block4_sepconv1_act')(x)
-#    x = layers.SeparableConv2D(728, (3, 3),
-#                               padding='same',
-#                               use_bias=False,
-#                               name='block4_sepconv1')(x)
-#    x = layers.BatchNormalization(axis=channel_axis, name='block4_sepconv1_bn')(x)
-#    x = layers.Activation('relu', name='block4_sepconv2_act')(x)
-#    x = layers.SeparableConv2D(728, (3, 3),
-#                               padding='same',
-#                               use_bias=False,
-#                               name='block4_sepconv2')(x)
-#    x = layers.BatchNormalization(axis=channel_axis, name='block4_sepconv2_bn')(x)
-#
-#    x = layers.MaxPooling2D((3, 3), strides=(2, 2),
-#                            padding='same',
-#                            name='block4_pool')(x)
-#    x = layers.add([x, residual])
-# commented by renxi 20200918
+    x = layers.Activation('relu', name='block4_sepconv1_act')(x)
+    x = layers.SeparableConv2D(728, (3, 3),
+                              padding='same',
+                              use_bias=False,
+                              name='block4_sepconv1')(x)
+    x = layers.BatchNormalization(axis=channel_axis, name='block4_sepconv1_bn')(x)
+    x = layers.Activation('relu', name='block4_sepconv2_act')(x)
+    x = layers.SeparableConv2D(728, (3, 3),
+                              padding='same',
+                              use_bias=False,
+                              name='block4_sepconv2')(x)
+    x = layers.BatchNormalization(axis=channel_axis, name='block4_sepconv2_bn')(x)
+
+    x = layers.MaxPooling2D((3, 3), strides=(2, 2),
+                           padding='same',
+                           name='block4_pool')(x)
+    x = layers.add([x, residual])
+#commented by renxi 20200918
 # end 728 block
 
 # middle flux
@@ -251,28 +247,28 @@ def Xception(
 # end middle flux
 
 # 1024 block
-#    residual = layers.Conv2D(1024, (1, 1), strides=(2, 2),
-#                             padding='same', use_bias=False)(x)
-#    residual = layers.BatchNormalization(axis=channel_axis)(residual)
-#
-#    x = layers.Activation('relu', name='block13_sepconv1_act')(x)
-#    x = layers.SeparableConv2D(728, (3, 3),
-#                               padding='same',
-#                               use_bias=False,
-#                               name='block13_sepconv1')(x)
-#    x = layers.BatchNormalization(axis=channel_axis, name='block13_sepconv1_bn')(x)
-#    x = layers.Activation('relu', name='block13_sepconv2_act')(x)
-#    x = layers.SeparableConv2D(1024, (3, 3),
-#                               padding='same',
-#                               use_bias=False,
-#                               name='block13_sepconv2')(x)
-#    x = layers.BatchNormalization(axis=channel_axis, name='block13_sepconv2_bn')(x)
+    residual = layers.Conv2D(1024, (1, 1), strides=(2, 2),
+                            padding='same', use_bias=False)(x)
+    residual = layers.BatchNormalization(axis=channel_axis)(residual)
 
-#    x = layers.MaxPooling2D((3, 3),
-#                            strides=(2, 2),
-#                            padding='same',
-#                            name='block13_pool')(x)
-#    x = layers.add([x, residual])
+    x = layers.Activation('relu', name='block13_sepconv1_act')(x)
+    x = layers.SeparableConv2D(728, (3, 3),
+                              padding='same',
+                              use_bias=False,
+                              name='block13_sepconv1')(x)
+    x = layers.BatchNormalization(axis=channel_axis, name='block13_sepconv1_bn')(x)
+    x = layers.Activation('relu', name='block13_sepconv2_act')(x)
+    x = layers.SeparableConv2D(1024, (3, 3),
+                              padding='same',
+                              use_bias=False,
+                              name='block13_sepconv2')(x)
+    x = layers.BatchNormalization(axis=channel_axis, name='block13_sepconv2_bn')(x)
+
+    x = layers.MaxPooling2D((3, 3),
+                           strides=(2, 2),
+                           padding='same',
+                           name='block13_pool')(x)
+    x = layers.add([x, residual])
 # end 1024 block
     
 # output block
