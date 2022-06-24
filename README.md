@@ -1,44 +1,45 @@
-# 光束远场传输模拟程序使用方法
-所有操作在light目录下进行
-## step1： 生成指定阶数分布的Zernike系数矩阵
-输入参数：
-```python
-nsnapshots = 10000 # 指定帧数
-nbatch = 1 # 分成nbatch个dat文件生成
-nzernike = 65 # zernike阶数
-low = -0.5 # zernike分布下限
-high = 0.5 # zernike分布上限
-date = "220623_0.5" 
-```
-运行命令： `python aznk_generate.py`；
+# Deep-Light
+## 仓库说明
 
-输出： 在data文件夹中生成系数矩阵的.dat和.npy文件。
+本仓库致力于研究光束远场传输模拟以及基于机器学习的波前相差感知两部分内容。
 
-## step2： 生成远场
+## 仓库结构
 
-进入`tests`文件夹内相应网格的文件夹，以`64_64`为例，
+  * [Ch 1: Doc](#ch-1-doc)
+  * [Ch 2: Light](#ch-2-light)
+  * [Ch 3: MechineLearning](#ch-3-mechinelearning)
+  * [Ch 4: Tests](#ch-4-support-vector-machines)
+  
+---
+---
 
-输入参数：更改`INPUT.txt`文件具体[参考](../doc/documentation.md)；
-
-运行命令：`bash test64.sh`；
-
-输出：相应.dat数据输出在`64_64`文件夹内。
-
-## step3： 将远场光强的.dat文件组装为机器学习所需的.npy文件
-
-进入`tests`文件夹内相应网格的文件夹，以`64_64`为例，
-
-输入参数：
-```python
-nsnapshots = 10000 # 指定帧数
-distribution = "0.5"
-nzernike = 35
-intensity_dir = "/home/xianyuer/yuer/num_mechinelearning/deep-light/tests/64_64/dl_outIntensity.dat"
-```
-同时需要更改
-```python
-np.save('/home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/data/outIntensity_%d_%s_64_%d'%(nzernike,distribution,nsnapshots),intensity)
-```
-运行命令： `python data.py `
-
-输出：用于机器学习的.npy光强文件。
+## [Ch 1: Doc](doc/README.md)
+本目录主要介绍了程序所用的算法以及必要的程序说明文件。
+ 1. [光束远场传输程序输入参数说明](doc/documentation.md)
+  * 介绍了光束远场传输模拟程序中所有输入参数的具体含义以及选择范围。
+ 2. [光束远场传输模拟算法]()
+  * 介绍了聚焦光束远场计算的FFT方法。
+ 3. [基于机器学习的波前相差感知程序说明]()  
+  * 介绍了程序所选取的神经网络以及相对应的输入参数。
+---
+---  
+## [Ch 2: Light](light/README.md)
+光束远场传输模拟程序：本程序用于模拟点光源，在经过由Zernike多项式模拟的相位扰动后得到的远场。程序可以读入随机生成的Zernike多项式系数，且批量生成与之相匹配的远场光强。
+  * 程序各个模块的作用；
+  * 程序结果展示；
+  * 程序运行方法。
+---
+---
+## [Ch 3: MechineLearning](mechinelearning/README.md)
+基于机器学习的波前相差感知程序：运用机器学习的方法由远场光强学习到波前像差对应的Zernike多项式系数。目前参考的网络有：简化后的Xception模型、Xception模型、ResNet模型。
+  * 程序各个模块的作用；
+  * 程序结果展示；
+  * 程序运行方法。
+---
+---
+## [Ch 4: Tests](tests/README.md)
+<font size=3>光束远场传输程序的测试文档，其中包括`32*32`，`64*64`,`128*128`，`256*256`四种网格。需要输入`INPUT.txt`和Zernike系数`.dat`文件。
+运行方法：`bash test64.sh`
+[具体参数含义](doc/documentation.md),[程序结果展示](light/README.md))。</font></b>
+---
+---
