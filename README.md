@@ -39,8 +39,6 @@
 ---
 ## [Ch 4: Tests](tests/README.md)
 光束远场传输程序的测试文档，其中包括`32*32`，`64*64`,`128*128`，`256*256`四种网格。需要输入`INPUT.txt`和Zernike系数`.dat`文件。
-运行方法：`bash test64.sh`。
-
-#### [具体参数含义](doc/documentation.md),[程序结果展示](light/README.md)
+运行方法：`bash test64.sh`。#### [具体参数含义](doc/documentation.md),[程序结果展示](light/README.md)
 ---
 ---
