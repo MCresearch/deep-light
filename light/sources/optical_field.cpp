@@ -93,8 +93,8 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
 
   a02 = INPUT.a0 * INPUT.a0;
   // Phase
-  opt.maxZnkDim = maxZernike(INPUT.maxZnkOrder);
-  cout << "maxZnkDim =" << opt.maxZnkDim << endl;
+  // opt.maxZnkDim = maxZernike(INPUT.maxZnkOrder);
+  // cout << "maxZnkDim =" << opt.maxZnkDim << endl;
   opt.nznk = new int[opt.maxZnkDim + 1]();
   opt.mznk = new int[opt.maxZnkDim + 1]();
   // nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete
@@ -183,8 +183,8 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
     // opt.aznk[7] = 0.386754435348797;
     // opt.aznk[8] = 1.36843853446997;
     // opt.aznk[9] = -0.711775011298688;
-    for (int j = 1; j <= 65; j++) {
-      opt.aznk[j] = a[num + 1][j];
+    for (int j = 1; j <= opt.maxZnkDim; j++) {
+      opt.aznk[j] = a[num][j-1];
       cout << j << " " << opt.aznk[j] << endl;
     }
 

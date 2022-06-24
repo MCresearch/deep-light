@@ -24,27 +24,28 @@ int main() {
   OPT::Init_Intensity(INPUT, opt);
 
   double a1 = 0.0;
-  a1 = 0.2391;
-  default_random_engine random(a1);
-  std::uniform_real_distribution<double> dis(0.0, 1.0);
-  
+  // a1 = 0.2391;
+  // default_random_engine random(a1);
+  // std::uniform_real_distribution<double> dis(0.0, 1.0);
+  opt.maxZnkDim = maxZernike(INPUT.maxZnkOrder);
+  cout << "maxZnkDim=" << opt.maxZnkDim << endl;
+
   int num_n = 0;
   num_n = INPUT.num_datas;
   double **a;
-  a[num_n+1][105];
-  a = new double *[num_n+1]();
-  for (int i = 0; i < num_n+1; i++) {
-    a[i] = new double[105]();
+  // a[num_n][opt.maxZnkDim];
+  a = new double *[num_n]();
+  for (int i = 0; i < num_n; i++) {
+    a[i] = new double[opt.maxZnkDim]();
   }
-  for (int i = 0; i < num_n+1; i++) {
-    for (int j = 0; j < 105; j++) {
+  for (int i = 0; i < num_n; i++) {
+    for (int j = 0; j < opt.maxZnkDim; j++) {
       a[i][j] = 0;
     }
   }
-  ifstream ifs(
-      "/home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/data/zernike_220623_0.5_65_10000.dat");
-  for (int i = 1; i <= num_n; i++) {
-    for (int j = 1; j <= 65; j++) {
+  ifstream ifs(INPUT.aznk_dir);
+  for (int i = 0; i < num_n; i++) {
+    for (int j = 0; j < opt.maxZnkDim; j++) {
       ifs >> a[i][j];
     }
   }
@@ -52,7 +53,7 @@ int main() {
 
   for (int i = 0; i < INPUT.num_datas; i++) {
 
-    a1 = dis(random);
+    // a1 = dis(random);
     OPT::Init_Phase(INPUT, opt, a1, a, i,
                     INPUT.Phase_option); // add for "random" or "confirm"
 

@@ -46,7 +46,8 @@ public:
 
     string Phase_option;
     string dir;
-    int    num_datas;
+    string aznk_dir;
+    int num_datas;
     /** Read in input parameters
      */
     int out_inIntensity;

@@ -21,7 +21,7 @@ eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方
 Phase_option confirm            add for "random" or "confirm"
 
 dir ./            path
-
+aznk_dir /home/xianyuer/yuer/num_mechinelearning/deep-light/light/data/zernike_220623_0.5_65_10000.dat
 num_datas 1
 
 out_inIntensity 1

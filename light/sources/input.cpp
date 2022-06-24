@@ -31,6 +31,7 @@ Input::Input()  //
     eeznk = 0.0;
     Phase_option = "";
     dir = "";
+    aznk_dir = "";
 
     num_datas = 0;
 
@@ -126,6 +127,11 @@ bool Input::INIT(Input &INPUT)  //
         else if (strcmp(word3, "dir") == 0)
         {
             ifs >> INPUT.dir;
+            ifs.ignore(150, '\n');
+        }
+        else if (strcmp(word3, "aznk_dir") == 0)
+        {
+            ifs >> INPUT.aznk_dir;
             ifs.ignore(150, '\n');
         }
         else if (strcmp(word3, "num_datas") == 0)
@@ -305,6 +311,11 @@ bool Input::INIT(Input &INPUT)  //
     if (INPUT.dir.empty())
     {
         cout << "please input dir." << endl;
+        return false;
+    }
+    if (INPUT.aznk_dir.empty())
+    {
+        cout << "please input aznk_dir." << endl;
         return false;
     }
     if (INPUT.num_datas <= 0)

@@ -13,7 +13,7 @@ xxz 20						    multiple of focal light field buffer area!'焦区光场缓冲区
 
 
 minZnkDim   1					minimum order of a polynomial!'多项式最小阶数
-maxZnkOrder 13				    maximum degree of polynomial!'多项式最大阶次（最大为13）
+maxZnkOrder 3				    maximum degree of polynomial!'多项式最大阶次（最大为13）
 
 rms 1							Phase variance !'相位方差
 eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方差变化指数
@@ -21,8 +21,8 @@ eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方
 Phase_option random            add for "random" or "confirm"
 
 dir ./            path
-
-num_datas 1000
+aznk_dir /home/xianyuer/yuer/num_mechinelearning/deep-light/light/data/zernike_220623_0.5_65_10000.dat
+num_datas 5000
 
 out_inIntensity 1
 
