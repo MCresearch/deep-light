@@ -22,7 +22,7 @@ Phase_option random            add for "random" or "confirm"
 
 dir ./            path
 
-aznk_dir /home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/0625_xceptionfull_2_64_10000_600/zernike_test_diff.txt
+aznk_dir /home/xianyuer/yuer/num_mechinelearning/deep-light/light/tests/test/zernike_220624_2_35_10000.dat
 num_datas 1
 out_inIntensity 1
 
