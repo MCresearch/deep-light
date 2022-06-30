@@ -7,7 +7,7 @@
 
   * [Ch 1: Doc](#ch-1-doc)
   * [Ch 2: Light](#ch-2-light)
-  * [Ch 3: MechineLearning](#ch-3-mechinelearning)
+  * [Ch 3: MachineLearning](#ch-3-mechinelearning)
   
 ---
 ---
@@ -30,7 +30,7 @@
 [具体参数含义](doc/documentation.md)。</font></b>
 ---
 ---
-## [Ch 3: MechineLearning](mechinelearning/README.md)
+## [Ch 3: MachineLearning](machinelearning/README.md)
 基于机器学习的波前相差感知程序：运用机器学习的方法由远场光强学习到波前像差对应的Zernike多项式系数。目前参考的网络有：简化后的Xception模型、Xception模型、ResNet模型。
   * 程序各个模块的作用；
   * 程序结果展示；
