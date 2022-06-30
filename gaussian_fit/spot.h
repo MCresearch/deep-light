@@ -11,11 +11,12 @@ class Spot
 
     double** value;
     double** fitted_value;
+    double quantile;
     int width;
     int window_width;
     int nlocal_max;
     int nlocal_max_ub;
-    double local_max_thre;
+    //double local_max_thre;
     int** local_max_coord;
     Gaussian* gaussian;
 
@@ -24,11 +25,13 @@ class Spot
     bool fit_;
     bool predict_;
 
+
     void readin(ifstream &ifs);
     void identify_local_max();
     void fit_gaussian();
     void predict();
     void clean();
+    void calc_quantile();
 };
 
 #endif

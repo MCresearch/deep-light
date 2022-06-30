@@ -2,6 +2,8 @@
 
 Input INPUT;
 ofstream ofs_running;
+ofstream ofs_local_max;
+ofstream ofs_predict;
 
 Input::Input()
 {
@@ -10,6 +12,7 @@ Input::Input()
     intensity_thre = 0.0;
     write_local_max = 0;
     write_predicted_intensity = 0;
+    top_pctg = 0.0;
 }
 
 Input::~Input(){}
@@ -26,6 +29,10 @@ void Input::read()
         else if (strcmp(keyword, "intensity_thre") == 0) read_value(ifs, intensity_thre);
         else if (strcmp(keyword, "write_local_max") == 0) read_value(ifs, write_local_max);
         else if (strcmp(keyword, "write_predicted_intensity") == 0) read_value(ifs, write_predicted_intensity);
+        else if (strcmp(keyword, "intensity_file") == 0) read_value(ifs, intensity_file);
+        else if (strcmp(keyword, "nsnapshot") == 0) read_value(ifs, nsnapshot);
+        else if (strcmp(keyword, "top_pctg") == 0) read_value(ifs, top_pctg);
+
     }
     return;
 }

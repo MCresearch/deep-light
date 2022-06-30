@@ -25,6 +25,9 @@ class Input
     double intensity_thre;
     int write_local_max;
     int write_predicted_intensity;
+    string intensity_file;
+    int nsnapshot;
+    double top_pctg; // The top percentage will be used to calculate the intensity threshold.
 
 
 
@@ -40,5 +43,7 @@ class Input
 
 extern Input INPUT;
 extern ofstream ofs_running;
+extern ofstream ofs_local_max;
+extern ofstream ofs_predict;
 
 #endif

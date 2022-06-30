@@ -1,0 +1,4 @@
+width 1024
+window_width 3
+top_pctg 0.01
+intensity_file ../gaussian/outIntensity.dat

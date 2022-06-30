@@ -1,10 +1,9 @@
-VPATH=./\
-../\
+
 
 OBJS = test_gaussian_fit.o\
-../input.o\
-../gaussian.o\
-../spot.o\
+../../input.o\
+../../gaussian.o\
+../../spot.o\
 
 CC=mpiicc
 
