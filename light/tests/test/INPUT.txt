@@ -16,13 +16,13 @@ minZnkDim   1					minimum order of a polynomial!'多项式最小阶数
 maxZnkOrder 7				    maximum degree of polynomial!'多项式最大阶次（最大为13）
 
 rms 1							Phase variance !'相位方差
-eeznk 0.2						Polynomial coefficient variance change index !'多项式系数方差变化指数
+eeznk 0.3						Polynomial coefficient variance change index !'多项式系数方差变化指数
 
 Phase_option random            add for "random" or "confirm"
 
 dir ./            path
 
-aznk_dir /home/xianyuer/yuer/num_mechinelearning/deep-light/light/tests/test/zernike_220624_2_35_10000.dat
+aznk_dir ./datazernike_0_220630_gauss_1_35_1.dat
 num_datas 1
 out_inIntensity 1
 

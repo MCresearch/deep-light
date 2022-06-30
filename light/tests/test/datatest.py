@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 
 
 outIntensity = np.loadtxt('./fortran/outIntensity.dat',comments='#')
-dl_outIntensity = np.loadtxt('./dl_outIntensity.dat',comments='#')
+dl_outIntensity = np.loadtxt('dl_outIntensity.dat',comments='#')
 # 相对误差
 diff_outIntensity = np.average(np.abs(outIntensity-dl_outIntensity)/outIntensity,axis=0)
 np.savetxt("diff_outIntensity",diff_outIntensity)
