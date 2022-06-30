@@ -7,8 +7,7 @@
 
   * [Ch 1: Doc](#ch-1-doc)
   * [Ch 2: Light](#ch-2-light)
-  * [Ch 3: MechineLearning](#ch-3-mechinelearning)
-  * [Ch 4: Tests](#ch-4-support-vector-machines)
+  * [Ch 3: MachineLearning](#ch-3-mechinelearning)
   
 ---
 ---
@@ -17,9 +16,7 @@
 本目录主要介绍了程序所用的算法以及必要的程序说明文件。
  1. [光束远场传输程序输入参数说明](doc/documentation.md)
   * 介绍了光束远场传输模拟程序中所有输入参数的具体含义以及选择范围。
- 2. [光束远场传输模拟算法]()
-  * 介绍了聚焦光束远场计算的FFT方法。
- 3. [基于机器学习的波前相差感知程序说明]()  
+ 2. [基于机器学习的波前相差感知程序说明]()  
   * 介绍了程序所选取的神经网络以及相对应的输入参数。
 ---
 ---  
@@ -28,18 +25,15 @@
   * 程序各个模块的作用；
   * 程序结果展示；
   * 程序运行方法。
+  * <font size=3>光束远场传输程序的测试文档，其中包括`32*32`，`64*64`,`128*128`，`256*256`四种网格。需要输入`INPUT.txt`和Zernike系数`.dat`文件。
+运行方法：`bash test64.sh`
+[具体参数含义](doc/documentation.md)。</font></b>
 ---
 ---
-## [Ch 3: MechineLearning](mechinelearning/README.md)
+## [Ch 3: MachineLearning](machinelearning/README.md)
 基于机器学习的波前相差感知程序：运用机器学习的方法由远场光强学习到波前像差对应的Zernike多项式系数。目前参考的网络有：简化后的Xception模型、Xception模型、ResNet模型。
   * 程序各个模块的作用；
   * 程序结果展示；
   * 程序运行方法。
----
----
-## [Ch 4: Tests](tests/README.md)
-<font size=3>光束远场传输程序的测试文档，其中包括`32*32`，`64*64`,`128*128`，`256*256`四种网格。需要输入`INPUT.txt`和Zernike系数`.dat`文件。
-运行方法：`bash test64.sh`
-[具体参数含义](doc/documentation.md),[程序结果展示](light/README.md))。</font></b>
 ---
 ---

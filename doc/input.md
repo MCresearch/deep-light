@@ -41,6 +41,10 @@
 
 `dir`: path.
 
+`aznk_dir`: Zernike coefficient matrix path.(.dat)
+
+`num_datas`: frame number 
+
 `out_inIntensity`: "1" is output inIntensity, "0" is not output.
 
 `out_zernike_coeff`: "1" is output zernike_coeff, "0" is not output.
