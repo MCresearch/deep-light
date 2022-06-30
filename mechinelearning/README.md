@@ -1,4 +1,4 @@
-# Mechine Leraning部分
+# Machine Leraning部分
 基于机器学习的波前相差感知程序：运用机器学习的方法由远场光强学习到波前像差对应的Zernike多项式系数。目前参考的网络有：简化后的Xception模型、Xception模型、ResNet模型。
 
 ---
