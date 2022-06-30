@@ -33,11 +33,11 @@ date = "220623_0.5"
 nsnapshots = 10000 # 指定帧数
 distribution = "0.5"
 nzernike = 35
-intensity_dir = "/home/xianyuer/yuer/num_mechinelearning/deep-light/tests/64_64/dl_outIntensity.dat"
+intensity_dir = "/home/xianyuer/yuer/num_machinelearning/deep-light/tests/64_64/dl_outIntensity.dat"
 ```
 同时需要更改
 ```python
-np.save('/home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/data/outIntensity_%d_%s_64_%d'%(nzernike,distribution,nsnapshots),intensity)
+np.save('/home/xianyuer/yuer/num_mechinelearning/deep-light/machinelearning/0620/data/outIntensity_%d_%s_64_%d'%(nzernike,distribution,nsnapshots),intensity)
 ```
 运行命令： `python data.py `
 
