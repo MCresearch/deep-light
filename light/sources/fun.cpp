@@ -228,7 +228,7 @@ void output_ur(const int n_grid, const string path, const int accuracy, double**
     {
         cout << "open file failure" << endl;
     }
-    outfile1 << "#output_ur" << endl;
+    // outfile1 << "#output_ur" << endl;
     for (int i = 0; i < n_grid; i++)
     {
         for (int j = 0; j < n_grid; j++)

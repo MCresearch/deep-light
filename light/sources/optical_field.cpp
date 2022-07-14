@@ -45,22 +45,25 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt) {
       y = (j + 1 - INPUT.n1) * INPUT.dxy0;
       y2 = y * y;
       r2 = x2 + y2;
-      opt.ur0[i][j] = exp(-1 * pow(r2 / a02, INPUT.mgs));
-      opt.ui0[i][j] = 0;
+      if (r2 < a02) {
+        opt.ur0[i][j] = exp(-1 * pow(r2 / a02, INPUT.mgs));
+        opt.ui0[i][j] = 0;
+      }
     }
   }
   // save inIntensity
   if (INPUT.out_inIntensity == 1) {
     output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6,
                        opt.ur0, opt.ui0);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur0);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ui0);
+    // output_ur(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur0);
+    // output_ui(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ui0);
   }
   return true;
 }
 
 bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
                      const string type) {
+
   opt.ur = new double *[INPUT.n_grid]();
   opt.ui = new double *[INPUT.n_grid]();
 
@@ -74,7 +77,6 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
       opt.ui[i][j] = 0;
     }
   }
-
   // Init_Phase a1 is seed
   // Polynomial coefficient: Gaussian random number
   // a1 = 0.2391;
@@ -90,19 +92,14 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
   char buffer[20];
   sprintf(buffer, "%f", a1);
   string str = buffer;
-
   a02 = INPUT.a0 * INPUT.a0;
-  // Phase
-  // opt.maxZnkDim = maxZernike(INPUT.maxZnkOrder);
-  // cout << "maxZnkDim =" << opt.maxZnkDim << endl;
   opt.nznk = new int[opt.maxZnkDim + 1]();
   opt.mznk = new int[opt.maxZnkDim + 1]();
   // nmlznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);  // delete
   // lznk?
   mnznk(INPUT.maxZnkOrder, opt.maxZnkDim, opt.nznk, opt.mznk);
-
   opt.aznk = new double[opt.maxZnkDim + 1]();
-  opt.eznk = new double[opt.maxZnkDim]();
+  opt.eznk = new double[opt.maxZnkDim + 1]();
   opt.ph = new double *[INPUT.n_grid]();
   opt.pl = new double[opt.maxZnkDim + 1]();
 
@@ -113,67 +110,32 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
   for (int i = 0; i < INPUT.n_grid; i++) {
     opt.ph[i] = new double[INPUT.n_grid]();
   }
-  for (int i = 0; i < INPUT.n_grid; i++) {
-    for (int j = 0; j < INPUT.n_grid; j++) {
-      opt.ph[i][j] = 0;
-    }
-  }
 
   if (type == "random") {
-    // origin a
-    /*
-    default_random_engine            random(a1);
-    std::normal_distribution<double> dis(0, 1);
+    double rdmg = 0;
+    // cout << a1 << endl;
+    // default_random_engine            random(a1);
+    // std::uniform_real_distribution<double> dis(-1.0, 1.0);
+    for (int i = 3; i <= opt.maxZnkDim; i++) {
+      rdm_gauss(a1, rdmg);
+      // rdmg = dis(random);
+      // cout << i << "\t" << rdmg << endl;
+      opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
+      opt.aznk[i] = rdmg * opt.eznk[i];
+      ss = ss + pow(opt.aznk[i], 2);
+    }
 
-            //double   rdmg[200];
-            //ifstream ifs("rdmg.dat");
-            //for (int i = 3; i <= opt.maxZnkDim; i++)
-            //{
-            //    ifs >> rdmg[i];
-            //}
-           //ifs.close();
-*/
-    /*
-        double rdmg = 0;
-        for (int i = 3; i <= opt.maxZnkDim; i++) {
-          // rdmg = dis(random);
-          rdm_gauss(a1, rdmg);
-          // cout << i << "\t" << rdmg << endl;
-          opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
-          opt.aznk[i] = rdmg * opt.eznk[i];
-          // opt.aznk[i] = rdmg[i] * opt.eznk[i];
-          ss = ss + pow(opt.aznk[i], 2);
-        }
-
-        //系数按方差rms归一化
-        for (int i = 3; i <= opt.maxZnkDim; i++) {
-          opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
-        }
-        if (INPUT.out_zernike_coeff == 1) {
-          // output_zernike_coeff(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff_"
-       +
-          // str + ".dat", 7,
-          //                        opt.maxZnkDim, opt.aznk, opt.nznk,
-          //                        opt.eznk);
-          output_zernike_coeff_0(INPUT.n_grid, INPUT.dir +
-       "dl_zernike_coeff.dat", 7, opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
-        }
-        // ofstream outfile23;
-        // outfile23.open("pl_aznk.dat", ios::app);
-    */
-    /*
-     double rdmg = 0;
-     for (int i = 1; i <= opt.maxZnkDim; i++)
-     {
-         rdm_gauss(a1, rdmg);
-         opt.aznk[i] = rdmg;
-     }
-     if (INPUT.out_zernike_coeff == 1) {
-
-       output_zernike_coeff_0(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff.dat",
-                              7, opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
-     }
- */
+    //系数按方差rms归一化
+    for (int i = 3; i <= opt.maxZnkDim; i++) {
+      opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
+    }
+    if (INPUT.out_zernike_coeff == 1) {
+      // output_zernike_coeff(INPUT.n_grid,
+      //                      INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
+      //                      opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+      output_zernike_coeff_0(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff.dat",
+                             7, opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+    }
     // opt.aznk[1] = 0;
     // opt.aznk[2] = 0;
     // opt.aznk[3] = 0.289685920360869 ;
@@ -183,11 +145,21 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
     // opt.aznk[7] = 0.386754435348797;
     // opt.aznk[8] = 1.36843853446997;
     // opt.aznk[9] = -0.711775011298688;
-    for (int j = 1; j <= opt.maxZnkDim; j++) {
-      opt.aznk[j] = a[num][j-1];
-      cout << j << " " << opt.aznk[j] << endl;
-    }
 
+    // for (int j = 1; j <= opt.maxZnkDim; j++) {
+    //   opt.aznk[j] = a[num][j - 1];
+    //   cout << j << " " << opt.aznk[j] << endl;
+    // }
+
+    // for (int i = 3; i <= opt.maxZnkDim; i++) {
+    //   opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
+    //   opt.aznk[i] = opt.aznk[i] * opt.eznk[i];
+    //   // ss = ss + pow(opt.aznk[i], 2);
+    // }
+    // //系数按方差rms归一化
+    // for (int i = 3; i <= opt.maxZnkDim; i++) {
+    //   opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
+    // }
     for (int i = 0; i < INPUT.n_grid; i++) {
       x = (i + 1 - INPUT.n1) * INPUT.dxy0;
       x2 = x * x;
@@ -195,9 +167,7 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
         y = (j + 1 - INPUT.n1) * INPUT.dxy0;
         y2 = y * y;
         r2 = x2 + y2;
-
         // cout << i <<" "<< j <<" "<< endl;
-
         if (r2 / a02 <= 1) {
           zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
           // radial_polynomials(opt.maxZnkDim, x, y, opt.nznk, opt.mznk,
@@ -217,24 +187,59 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
       }
     }
     // outfile23.close();
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_.dat", 6, opt.ph);
-  } 
-  else if (type == "confirm") {
-    ifstream ifs1(INPUT.dir + "inPhase.dat");
-    for (int j = 0; j < INPUT.n_grid; j++) {
-      for (int i = 0; i < INPUT.n_grid; i++) {
-        ifs1 >> opt.ph[i][j];
-        uri = opt.ur0[i][j];
-        opt.ur[i][j] = uri * cos(opt.ph[i][j]);
-        opt.ui[i][j] = uri * sin(opt.ph[i][j]);
+    // output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_.dat", 6, opt.ph);
+  } else if (type == "confirm") {
+    for (int j = 3; j <= opt.maxZnkDim; j++) {
+      opt.aznk[j] = a[num][j - 3];
+      //cout << j << " " << opt.aznk[j] << endl;
+    }
+    // for (int i = 3; i <= opt.maxZnkDim; i++) {
+    //   opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
+    //   opt.aznk[i] = opt.aznk[i] * opt.eznk[i];
+    //   //ss = ss + pow(opt.aznk[i], 2);
+    // }
+    //系数按方差rms归一化
+    // for (int i = 3; i <= opt.maxZnkDim; i++) {
+    //   opt.aznk[i] = opt.aznk[i] * sqrt(INPUT.rms / ss);
+    // }
+    if (INPUT.out_zernike_coeff == 1) {
+      // output_zernike_coeff(INPUT.n_grid,
+      //                      INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
+      //                      opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+      output_zernike_coeff_0(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff.dat",
+                             7, opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+    }
+    for (int i = 0; i < INPUT.n_grid; i++) {
+      x = (i + 1 - INPUT.n1) * INPUT.dxy0;
+      x2 = x * x;
+      for (int j = 0; j < INPUT.n_grid; j++) {
+        y = (j + 1 - INPUT.n1) * INPUT.dxy0;
+        y2 = y * y;
+        r2 = x2 + y2;
+        // cout << i <<" "<< j <<" "<< endl;
+        if (r2 / a02 <= 1) {
+          zernike_cg(opt.maxZnkDim, x / INPUT.a0, y / INPUT.a0, opt.pl);
+          // radial_polynomials(opt.maxZnkDim, x, y, opt.nznk, opt.mznk,
+          // opt.pl);
+          // cout << i <<" "<< j <<" "<< endl;
+          opt.ph[i][j] = 0;
+          for (int l = INPUT.minZnkDim; l <= opt.maxZnkDim; l++) {
+            opt.ph[i][j] = opt.ph[i][j] + opt.pl[l] * opt.aznk[l];
+            // cout << l << "\t" << opt.pl[l] << "\t" << opt.aznk[l] << endl;
+          }
+          // cout << i<<" "<<j<<" "<<"12221" << endl;
+          uri = opt.ur0[i][j];
+          opt.ur[i][j] = uri * cos(opt.ph[i][j]);
+          opt.ui[i][j] = uri * sin(opt.ph[i][j]);
+          // cout << i<<" "<<j<<" "<< "12222" << endl;
+        }
       }
     }
-    ifs1.close();
+    // output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_.dat", 6, opt.ph);
   } else {
     cout << "input phase type error!" << endl;
     exit(0);
   }
-
   if (INPUT.out_inPhase == 1) {
     output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat",
                        6, opt.ur, opt.ui);
@@ -246,16 +251,17 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
               opt.ui);
   }
 
+  delete[] opt.nznk;
+  delete[] opt.mznk;
   delete[] opt.aznk;
   delete[] opt.eznk;
   delete[] opt.pl;
-  /*
+
   for (int i = 0; i < INPUT.n_grid; i++) {
     delete[] opt.ph[i];
   }
   delete[] opt.ph;
-  */
-  cout << num << endl;
+  
   return true;
 }
 
@@ -279,9 +285,9 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt) {
 
   hr = new double[INPUT.n_grid]();
   hi = new double[INPUT.n_grid]();
-  cout << "111" << endl;
+  
   FFT::fft_initialize(INPUT.mm, INPUT.n_grid, fft);
-  // cout << "222" << endl;
+  
   // output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_fft_initialize.dat", 6,
   // opt.ur, opt.ui);
 
@@ -380,6 +386,22 @@ ifs2.close();
     output_ui(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6,
               opt.ui);
   }
+  
+    delete[] fft.kk;
+    delete[] fft.kj;
+    delete[] fft.km0;
+    delete[] fft.wr;
+    delete[] fft.wi;
+    for (int i = 0; i <= INPUT.n_grid; i++)
+    {
+         //??? fortran km的第二个下标是从1开始的现在为0
+        for (int j = 0; j < INPUT.mm; j++)
+        {
+            delete[] fft.km[i][j];  //??? fortran km的第三个下标是从1开始的现在为0
+        }
+        delete[] fft.km[i];
+    }
+    delete[] fft.km;
 
   mdfph(INPUT.n_grid, INPUT.n1, dxyz, dlta, ddxz, -1 * wave_number, opt.ur,
         opt.ui);
@@ -392,14 +414,56 @@ ifs2.close();
 
   // pkkz = 1.0 / ddxz / ddxz;
   // cout << ddxz << endl;
+  double **intensity;
+  double **down_intensity;
+  intensity = new double *[INPUT.n_grid];
+  down_intensity = new double *[128];
   for (int i = 0; i < INPUT.n_grid; i++) {
+    intensity[i] = new double[INPUT.n_grid]();
+  }
+for (int i = 0; i < 128; i++) {
+    down_intensity[i] = new double[128]();
+  }
+cout << "112" << endl;
+  for (int i = 0; i < INPUT.n_grid; i++)
+  {
     for (int j = 0; j < INPUT.n_grid; j++) {
-      opt.ur[i][j] = opt.ur[i][j]/ ddxz;
-      opt.ui[i][j] = opt.ui[i][j]/ ddxz;
+      opt.ur[i][j] = opt.ur[i][j] / ddxz;
+      opt.ui[i][j] = opt.ui[i][j] / ddxz;
+      intensity[i][j] = pow(opt.ur[i][j], 2) + pow(opt.ui[i][j], 2);
     }
   }
+
   if (INPUT.out_outIntensity == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_outIntensity.dat", 6,
+    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_outIntensity.dat", 1,
                        opt.ur, opt.ui);
   }
+
+  double max = 0;
+  for (int i = 0; i < INPUT.n_grid; i = i + 2)
+  {
+    for (int j = 0; j < INPUT.n_grid; j = j+2) {
+      
+      max = intensity[i][j];
+      if(max < intensity[i][j+1])
+      {
+        max = intensity[i][j+1];
+      }
+      if(max < intensity[i+1][j])
+      {
+        max = intensity[i+1][j];
+      }
+      if(max < intensity[i+1][j+1])
+      {
+        max = intensity[i+1][j+1];
+      }
+      down_intensity[i / 2][j / 2] = max;
+    }
+  }
+  output_ur(128, INPUT.dir + "dl_down_intensity.dat", 1, down_intensity);
+
+  delete[]  hr;
+  delete[]  hi;
+  delete[] down_intensity;
+  delete[] intensity;
 }
