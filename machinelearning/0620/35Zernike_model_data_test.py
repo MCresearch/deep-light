@@ -1,13 +1,14 @@
 ######### parameters setting ########
-data_size = [10000, 10000, 10000, 17000, 43000, 100000]
-model_name = "xceptionfull_35_2_64"
-epoch = [100, 100,600, 500, 400, 300]
+data_size = [200000, 10000, 30000, 100000]
+model_name = "35_128_1-100_midloop4"
+epoch = [150, 150, 150, 150]
 batch_size=16
 #batch_size=8
 seed = 12333345
-data_time = "220623"
-#input_model = False
-input_model = "/home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/xceptionfull_35_2_64_220620_10000_50.h5"
+data_time = "221007"
+input_model = False
+dir = "/data/home/scv1925/run/3_zhangxianyue/deep-light/35_rms1_200000/"
+#input_model = "./35_128_200000_50-100_midloop4_220718_200000_50.h5"
 #model_path = "0921_2_20210322_10_0.1_17000_300.h5"
 #####################################
 
@@ -46,6 +47,7 @@ import tensorflow as tf
 from keras.callbacks import Callback
 from xception import Xception
 
+
 ###################################
 '''
 class my_callback(Callback):
@@ -70,47 +72,61 @@ class my_callback(Callback):
         print("test loss is :{}".format(testLoss))
 '''
 ############# data and epoch specification #################
-intensity_dir = "/home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/data/outIntensity_35_2_64_10000.npy"
-zernike_dir = "/home/xianyuer/yuer/num_mechinelearning/deep-light/mechinelearning/0620/data/zernike_220620_2_35_10000.npy"
-#intensity_dir = "/home/lrx/work/10_MO2020/202103+05/intensity_20210305mix.npy"
-#zernike_dir = "/home/lrx/work/10_MO2020/202103+05/zernike_20210305mix.npy"
-for i in range(0, 1):
+    
+intensity_dir = dir+"data/1_nor_outintensity.npy"
+zernike_dir = dir+"data/1_zernike_35.npy"
+
+x = np.load(intensity_dir)
+y = np.load(zernike_dir)
+
+y = y[:,2:]
+
+print("x shape = ", np.shape(x))
+print("y shape = ", np.shape(y))
+
+for i in range(1):
     nsnapshot = data_size[i]
     nepoch = epoch[i]
-    x = np.load(intensity_dir)
-    y = np.load(zernike_dir)
     print("nsnapshot = %s" % nsnapshot)
-    print("x shape = ", np.shape(x))
-    print("y shape = ", np.shape(y))
-    train_x = x[:nsnapshot].reshape([nsnapshot, 64, 64, 1])
+ 
+    train_x = x[:nsnapshot].reshape([nsnapshot,128, 128, 1])
     train_y = y[:nsnapshot]
 
-    test_x = x[-1000:].reshape([1000, 64, 64, 1])
+    test_x = x[-1000:].reshape([1000, 128, 128, 1])
     test_y = y[-1000:]
     print("test_x shape = ", np.shape(test_x))
     print("test_y shape = ", np.shape(test_y))
+    
     ############ model specification ##############
     try:
         if(input_model == False):
-            model = Xception(input_shape = (64, 64, 1),
+            model = Xception(input_shape = (128, 128, 1),
                  pooling = 'avg',
                  backend=keras.backend,
                  layers=keras.layers,
                  models=keras.models,
                  utils=keras.utils,
-                 outdim = 35,
-                 middle_loop=8# middle flux diminished to NONE
+                 middle_loop=4, #renxi added
+                 outdim = 33,
         )
         else:
-            model = load_model(input_model)
+            model = Xception(input_shape = (128, 128, 1),
+                 pooling = 'avg',
+                 backend=keras.backend,
+                 layers=keras.layers,
+                 models=keras.models,
+                 utils=keras.utils,
+                 middle_loop=4, #renxi added
+                 outdim = 33,)
+            model.load_weights(input_model)
             print("Model loaded from " + input_model)
         model.compile(loss=losses.mean_squared_error,
                     optimizer='adam') #mean_squared_error为损失函数，adam优化器
         model_callback = keras.callbacks.Callback() #回调函数
-        modelcheckpoint = ModelCheckpoint(filepath = "./ckpt_models/model.{epoch:02d}.hdf5",
-                                        save_best_only=False,
-                                        period = 200) #每个训练期之后保存模型。
-        reduceLR = ReduceLROnPlateau(monitor='loss', factor=0.1, patience=50, min_lr = 0.0005) #当标准评估停止提升时，降低学习速率。
+        
+        file_path = './weights-improvement-{epoch:03d}.h5'
+        modelcheckpoint = ModelCheckpoint(filepath = file_path, monitor='val_loss',save_best_only=True, mode='min',period = 20)
+        reduceLR = ReduceLROnPlateau(monitor='val_loss', factor=0.001, patience=10, min_lr = 1e-8) #当标准评估停止提升时，降低学习速率。
         #batch_print_callback = keras.callbacks.LambdaCallback(on_epoch_end=lambda batch,logs: print(model.predict(train_x)))
         history = History() #把所有事件都记录到 History 对象的回调函数。这个回调函数被自动启用到每一个 Keras 模型。History 对象会被模型的 fit 方法返回。
         callbacks = [modelcheckpoint, reduceLR, history]
@@ -136,8 +152,7 @@ for i in range(0, 1):
 
     ############ End model fitting #################
 
-    model.save(model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+".h5")
+    model.save_weights(model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+".h5")
     with open(model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+"_history.json", 'w') as f:
         json.dump(history.history, f, cls = NpEncoder)
-
 

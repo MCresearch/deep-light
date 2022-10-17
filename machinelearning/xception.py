@@ -20,6 +20,14 @@ from __future__ import print_function
 """
 renxi revised this script in order to adapt to optical problem. renxi 20200915
 """
+from keras import backend as K
+from keras.layers import Activation
+def tanh2(x):
+    return 2*K.tanh(x)
+
+from keras.utils.generic_utils import get_custom_objects
+get_custom_objects().update({'tanh2': Activation(tanh2)})
+
 
 
 _KERAS_BACKEND = None
@@ -28,6 +36,8 @@ _KERAS_MODELS = None
 _KERAS_UTILS = None
 
 import os
+import numpy as np
+import torch 
 #import warnings
 
 #from . import get_submodules_from_kwargs
@@ -294,7 +304,11 @@ def Xception(
         x = layers.GlobalAveragePooling2D()(x)
     elif pooling == 'max':
         x = layers.GlobalMaxPooling2D()(x)
-    x = layers.Dense(outdim, activation = 'tanh')(x) # renxi added
+    x = layers.Dense(outdim, activation = 'tanh2')(x) # xianyue added
+    # x111 = np.zeros((1,outdim))# xianyue add
+    # for i in range(outdim):# xianyue add
+    #     x111[0,i] = 2 # xianyue add
+    # x = layers.Multiply()([x,x111]) # xianyue add
     # Ensure that the model takes into account
     # any potential predecessors of `input_tensor`.
     #if input_tensor is not None:
