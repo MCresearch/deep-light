@@ -55,14 +55,14 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt) {
   if (INPUT.out_inIntensity == 1) {
     output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6,
                        opt.ur0, opt.ui0);
-    // output_ur(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ur0);
-    // output_ui(INPUT.n_grid, INPUT.dir + "dl_inIntensity.dat", 6, opt.ui0);
+    // output_ur(INPUT.n_grid, dir0 + "dl_inIntensity.dat", 6, opt.ur0);
+    // output_ui(INPUT.n_grid, dir0 + "dl_inIntensity.dat", 6, opt.ui0);
   }
   return true;
 }
 
 bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
-                     const string type) {
+                     const string type, string dir0) {
 
   opt.ur = new double *[INPUT.n_grid]();
   opt.ui = new double *[INPUT.n_grid]();
@@ -131,10 +131,10 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
     }
     if (INPUT.out_zernike_coeff == 1) {
       // output_zernike_coeff(INPUT.n_grid,
-      //                      INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
+      //                      dir0 + "dl_zernike_coeff_" + str + ".dat", 7,
       //                      opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
-      output_zernike_coeff_0(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff.dat",
-                             7, opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+      output_zernike_coeff_0(INPUT.n_grid, dir0 + "dl_zernike_coeff.dat", 7,
+                             opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
     }
     // opt.aznk[1] = 0;
     // opt.aznk[2] = 0;
@@ -187,11 +187,12 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
       }
     }
     // outfile23.close();
-    // output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_.dat", 6, opt.ph);
+    // output_ur(INPUT.n_grid, dir0 + "dl_ph_.dat", 6, opt.ph);
   } else if (type == "confirm") {
     for (int j = 3; j <= opt.maxZnkDim; j++) {
       opt.aznk[j] = a[num][j - 3];
-      //cout << j << " " << opt.aznk[j] << endl;
+      // opt.aznk[j] = a[num][j-1]; //defocus
+      // cout << j << " " << opt.aznk[j] << endl;
     }
     // for (int i = 3; i <= opt.maxZnkDim; i++) {
     //   opt.eznk[i] = exp(-opt.nznk[i] * INPUT.eeznk);
@@ -204,10 +205,10 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
     // }
     if (INPUT.out_zernike_coeff == 1) {
       // output_zernike_coeff(INPUT.n_grid,
-      //                      INPUT.dir + "dl_zernike_coeff_" + str + ".dat", 7,
+      //                      dir0 + "dl_zernike_coeff_" + str + ".dat", 7,
       //                      opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
-      output_zernike_coeff_0(INPUT.n_grid, INPUT.dir + "dl_zernike_coeff.dat",
-                             7, opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
+      output_zernike_coeff_0(INPUT.n_grid, dir0 + "dl_zernike_coeff.dat", 7,
+                             opt.maxZnkDim, opt.aznk, opt.nznk, opt.eznk);
     }
     for (int i = 0; i < INPUT.n_grid; i++) {
       x = (i + 1 - INPUT.n1) * INPUT.dxy0;
@@ -235,20 +236,18 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
         }
       }
     }
-    // output_ur(INPUT.n_grid, INPUT.dir + "dl_ph_.dat", 6, opt.ph);
+    // output_ur(INPUT.n_grid, dir0 + "dl_ph_.dat", 6, opt.ph);
   } else {
     cout << "input phase type error!" << endl;
     exit(0);
   }
   if (INPUT.out_inPhase == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat",
-                       6, opt.ur, opt.ui);
-    // output_inPhase(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6,
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_inPhase_" + str + ".dat", 6,
+                       opt.ur, opt.ui);
+    // output_inPhase(INPUT.n_grid, dir0 + "dl_inPhase_" + str + ".dat", 6,
     // opt.ph);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6,
-              opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_inPhase_" + str + ".dat", 6,
-              opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_inPhase_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_inPhase_" + str + ".dat", 6, opt.ui);
   }
 
   delete[] opt.nznk;
@@ -261,11 +260,12 @@ bool OPT::Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
     delete[] opt.ph[i];
   }
   delete[] opt.ph;
-  
+
   return true;
 }
 
-void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt) {
+void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt,
+                                string dir0) {
   cout << "numercial_diffraction" << endl;
   double dxy0 = 0.0;
   double dxyz = 0.0;
@@ -285,10 +285,10 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt) {
 
   hr = new double[INPUT.n_grid]();
   hi = new double[INPUT.n_grid]();
-  
+
   FFT::fft_initialize(INPUT.mm, INPUT.n_grid, fft);
-  
-  // output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_fft_initialize.dat", 6,
+
+  // output_inIntensity(INPUT.n_grid, dir0 + "dl_fft_initialize.dat", 6,
   // opt.ur, opt.ui);
 
   dxy0 = INPUT.aa0 / INPUT.n_grid;
@@ -301,44 +301,40 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt) {
   zzzz = INPUT.zfh / (1 - dlta * INPUT.zfh);
   wave_number = 2 * PI / INPUT.plm;
 
-  // output_ur(INPUT.n_grid, INPUT.dir + "dl_ur_" + str + ".dat", 6, opt.ur);
-  // output_ur(INPUT.n_grid, INPUT.dir + "dl_ui_" + str + ".dat", 6, opt.ui);
+  // output_ur(INPUT.n_grid, dir0 + "dl_ur_" + str + ".dat", 6, opt.ur);
+  // output_ur(INPUT.n_grid, dir0 + "dl_ui_" + str + ".dat", 6, opt.ui);
 
   focusing(INPUT.n_grid, INPUT.n1, wave_number, dxy0, 1 / INPUT.zfh, opt.ur,
            opt.ui);
   if (INPUT.out_focusing == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat",
-                       6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat", 6,
-              opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_focusing_" + str + ".dat", 6,
-              opt.ui);
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_focusing_" + str + ".dat", 6,
+                       opt.ur, opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_focusing_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_focusing_" + str + ".dat", 6, opt.ui);
   }
   mdfph(INPUT.n_grid, INPUT.n1, dxy0, dlta, 1, wave_number, opt.ur, opt.ui);
   if (INPUT.out_mdfph1 == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6,
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_mdfph1_" + str + ".dat", 6,
                        opt.ur, opt.ui);
     // cout << "dxy0" << dxy0 << "dlta" << dlta << "wave_number" << wave_number
     // << endl;
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6, opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_mdfph1_" + str + ".dat", 6, opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_mdfph1_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_mdfph1_" + str + ".dat", 6, opt.ui);
   }
   FFT::my_fft2d(fft, INPUT.n_grid, dxy0, 2, opt.ur, opt.ui);
   if (INPUT.out_my_fft2d1 == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat",
-                       6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat", 6,
-              opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_my_fft2d1_" + str + ".dat", 6,
-              opt.ui);
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_my_fft2d1_" + str + ".dat", 6,
+                       opt.ur, opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_my_fft2d1_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_my_fft2d1_" + str + ".dat", 6, opt.ui);
   }
 
   prop1(INPUT.n_grid, INPUT.n1, zzzz, wave_number, INPUT.aa0, hr, hi);
 
   // ofstream outfile1;
   // ofstream outfile2;
-  // outfile1.open(INPUT.dir + "dl_prop1_hr.dat", ios::app);
-  // outfile2.open(INPUT.dir + "dl_prop1_hi.dat", ios::app);
+  // outfile1.open(dir0 + "dl_prop1_hr.dat", ios::app);
+  // outfile2.open(dir0 + "dl_prop1_hi.dat", ios::app);
   // outfile1.setf(ios::fixed, ios::floatfield);
   // outfile1.precision(6);
   // outfile2.setf(ios::fixed, ios::floatfield);
@@ -357,10 +353,10 @@ void OPT::numercial_diffraction(Input &INPUT, const double a1, OPT &opt) {
 
   evol1(INPUT.n_grid, hr, hi, opt.ur, opt.ui);
   if (INPUT.out_evol1 == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6,
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_evol1_" + str + ".dat", 6,
                        opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6, opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_evol1_" + str + ".dat", 6, opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_evol1_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_evol1_" + str + ".dat", 6, opt.ui);
   }
 
   /*
@@ -379,37 +375,33 @@ ifs2.close();
 */
   FFT::my_fft2d(fft, INPUT.n_grid, dk0, -2, opt.ur, opt.ui);
   if (INPUT.out_my_fft2d2 == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat",
-                       6, opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6,
-              opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_my_fft2d2_" + str + ".dat", 6,
-              opt.ui);
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_my_fft2d2_" + str + ".dat", 6,
+                       opt.ur, opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_my_fft2d2_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_my_fft2d2_" + str + ".dat", 6, opt.ui);
   }
-  
-    delete[] fft.kk;
-    delete[] fft.kj;
-    delete[] fft.km0;
-    delete[] fft.wr;
-    delete[] fft.wi;
-    for (int i = 0; i <= INPUT.n_grid; i++)
-    {
-         //??? fortran km的第二个下标是从1开始的现在为0
-        for (int j = 0; j < INPUT.mm; j++)
-        {
-            delete[] fft.km[i][j];  //??? fortran km的第三个下标是从1开始的现在为0
-        }
-        delete[] fft.km[i];
+
+  delete[] fft.kk;
+  delete[] fft.kj;
+  delete[] fft.km0;
+  delete[] fft.wr;
+  delete[] fft.wi;
+  for (int i = 0; i <= INPUT.n_grid; i++) {
+    //??? fortran km的第二个下标是从1开始的现在为0
+    for (int j = 0; j < INPUT.mm; j++) {
+      delete[] fft.km[i][j]; //??? fortran km的第三个下标是从1开始的现在为0
     }
-    delete[] fft.km;
+    delete[] fft.km[i];
+  }
+  delete[] fft.km;
 
   mdfph(INPUT.n_grid, INPUT.n1, dxyz, dlta, ddxz, -1 * wave_number, opt.ur,
         opt.ui);
   if (INPUT.out_mdfph2 == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6,
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_mdfph2_" + str + ".dat", 6,
                        opt.ur, opt.ui);
-    output_ur(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ur);
-    output_ui(INPUT.n_grid, INPUT.dir + "dl_mdfph2_" + str + ".dat", 6, opt.ui);
+    output_ur(INPUT.n_grid, dir0 + "dl_mdfph2_" + str + ".dat", 6, opt.ur);
+    output_ui(INPUT.n_grid, dir0 + "dl_mdfph2_" + str + ".dat", 6, opt.ui);
   }
 
   // pkkz = 1.0 / ddxz / ddxz;
@@ -421,12 +413,10 @@ ifs2.close();
   for (int i = 0; i < INPUT.n_grid; i++) {
     intensity[i] = new double[INPUT.n_grid]();
   }
-for (int i = 0; i < 128; i++) {
+  for (int i = 0; i < 128; i++) {
     down_intensity[i] = new double[128]();
   }
-cout << "112" << endl;
-  for (int i = 0; i < INPUT.n_grid; i++)
-  {
+  for (int i = 0; i < INPUT.n_grid; i++) {
     for (int j = 0; j < INPUT.n_grid; j++) {
       opt.ur[i][j] = opt.ur[i][j] / ddxz;
       opt.ui[i][j] = opt.ui[i][j] / ddxz;
@@ -435,35 +425,31 @@ cout << "112" << endl;
   }
 
   if (INPUT.out_outIntensity == 1) {
-    output_inIntensity(INPUT.n_grid, INPUT.dir + "dl_outIntensity.dat", 1,
-                       opt.ur, opt.ui);
+    output_inIntensity(INPUT.n_grid, dir0 + "dl_outIntensity.dat", 1, opt.ur,
+                       opt.ui);
   }
 
   double max = 0;
-  for (int i = 0; i < INPUT.n_grid; i = i + 2)
-  {
-    for (int j = 0; j < INPUT.n_grid; j = j+2) {
-      
+  for (int i = 0; i < INPUT.n_grid; i = i + 2) {
+    for (int j = 0; j < INPUT.n_grid; j = j + 2) {
+
       max = intensity[i][j];
-      if(max < intensity[i][j+1])
-      {
-        max = intensity[i][j+1];
+      if (max < intensity[i][j + 1]) {
+        max = intensity[i][j + 1];
       }
-      if(max < intensity[i+1][j])
-      {
-        max = intensity[i+1][j];
+      if (max < intensity[i + 1][j]) {
+        max = intensity[i + 1][j];
       }
-      if(max < intensity[i+1][j+1])
-      {
-        max = intensity[i+1][j+1];
+      if (max < intensity[i + 1][j + 1]) {
+        max = intensity[i + 1][j + 1];
       }
       down_intensity[i / 2][j / 2] = max;
     }
   }
-  output_ur(128, INPUT.dir + "dl_down_intensity.dat", 1, down_intensity);
+  output_ur(128, dir0 + "dl_down_intensity.dat", 1, down_intensity);
 
-  delete[]  hr;
-  delete[]  hi;
+  delete[] hr;
+  delete[] hi;
   delete[] down_intensity;
   delete[] intensity;
 }

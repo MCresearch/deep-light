@@ -13,8 +13,8 @@ public:
 
   static bool Init_Intensity(Input &INPUT, OPT &opt);
   static bool Init_Phase(Input &INPUT, OPT &opt, double a1, double **a, int num,
-                         const string type);
-  static void numercial_diffraction(Input &INPUT, const double a1, OPT &opt);
+                         const string type,string dir0);
+  static void numercial_diffraction(Input &INPUT, const double a1, OPT &opt,string dir0);
 
   double **ur0; ///< The real part of the transformation
   double **ui0; ///< The imaginary part of the transformation

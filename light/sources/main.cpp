@@ -35,53 +35,100 @@ int main() {
   int num_n = 0;
   num_n = INPUT.num_datas;
   double **a;
+  double **a0;
   // a[num_n][opt.maxZnkDim];
   a = new double *[num_n]();
+  a0 = new double *[num_n]();
   for (int i = 0; i < num_n; i++) {
     a[i] = new double[opt.maxZnkDim]();
+    a0[i] = new double[opt.maxZnkDim]();
   }
   for (int i = 0; i < num_n; i++) {
     for (int j = 0; j < opt.maxZnkDim; j++) {
       a[i][j] = 0;
+      a0[i][j] = 0;
     }
   }
-  if (INPUT.Phase_option == "confirm") {
-    ifstream ifs(INPUT.aznk_dir);
-    for (int i = 0; i < num_n; i++) {
-      for (int j = 0; j < opt.maxZnkDim - 2; j++) {
-        ifs >> a[i][j];
+
+  string dir0;
+  dir0 = INPUT.dir;
+  // dir0 = INPUT.dir+"predict_b/b_diff_";
+  // double xxzz[21] = {34.92, 35.03, 35.14, 35.24, 35.35, 35.46, 35.57,
+  //                    35.68, 35.78, 35.89, 36.00, 36.11, 36.22, 36.32,
+  //                    36.43, 36.54, 36.65, 36.76, 36.86, 36.97, 37.08};
+  // for (int k = 10; k < 11; k++) {
+  //   std::stringstream ss;
+  //   ss << setprecision(4) << xxzz[k];
+  //   string str;
+  //   str = ss.str();
+  //   string dir0;
+  //   dir0 = INPUT.dir + to_string(k + 1) + "_" + str + "/diff_"; // 1_34.92_
+  //   INPUT.aznk_dir = INPUT.dir + to_string(k + 1) + "_" + str +
+  //   "/zernike_test_diff.txt"; cout << dir0 << endl; cout << INPUT.aznk_dir <<
+  //   endl; INPUT.xxz = xxzz[k]; INPUT.aaz = INPUT.airy * INPUT.xxz; cout <<
+  //   "INPUT.xxz " << INPUT.xxz << endl;
+
+  // double defocus[21] = {-0.1,  -0.09, -0.08, -0.07, -0.06, -0.05, -0.04,
+  //                       -0.03, -0.02, -0.01, 0.00,  0.01,  0.02,  0.03,
+  //                       0.04,  0.05,  0.06,  0.07,  0.08,  0.09,  0.1};
+  // double defocus[8] = {-0.5,  -0.4, -0.3, -0.2, 0.2, 0.3, 0.4,0.5};
+  // for (int k = 0; k < 8; k++) {
+  //   INPUT.aznk_dir = INPUT.dir + +"predict_b/" + to_string(k + 1) + "zernike_test_diff.txt";
+    if (INPUT.Phase_option == "confirm")
+    {
+      ifstream ifs(INPUT.aznk_dir);
+      for (int i = 0; i < num_n; i++)
+      {
+        for (int j = 0; j < opt.maxZnkDim - 2; j++)
+        // for (int j = 0; j < opt.maxZnkDim; j++) //defocus
+        {
+          ifs >> a0[i][j];
+          a[i][j] = a0[i][j];
+        }
+        // a[i][2] = a[i][2] + 1.45; //defocus
       }
+      ifs.close();
     }
-    ifs.close();
-  }
-  for (int i = 0; i < INPUT.num_datas; i++) {
-    a1 = dis(random);
-    OPT::Init_Phase(INPUT, opt, a1, a, i,
-                    INPUT.Phase_option); // add for "random" or "confirm"
-    OPT::numercial_diffraction(INPUT, a1, opt);
-    cout << i << endl;
+  // double defocus[21] = {-0.5,  -0.45, -0.4,  -0.35, -0.3, -0.25, -0.2,
+  //                       -0.15, -0.1,  -0.05, 0.00,  0.05, 0.1,   0.15,
+  //                       0.2,   0.25,  0.3,   0.35,  0.4,  0.45,  0.5};
 
-    for (int i = 0; i <INPUT.n_grid; i++) {
-      delete[] opt.ur[i];
-      delete[] opt.ui[i];
+  // double defocus[21] = {-0.1,  -0.09, -0.08, -0.07, -0.06, -0.05, -0.04,
+  //                       -0.03, -0.02, -0.01, 0.00,  0.01,  0.02,  0.03,
+  //                       0.04,  0.05,  0.06,  0.07,  0.08,  0.09,  0.1};
+  
+  // double defocus[8] = {-0.5,  -0.4, -0.3, -0.2, 0.2, 0.3, 0.4,
+  //                       0.5};
+  // for (int k = 0; k < 8; k++) {
+  //   for (int i = 0; i < num_n; i++) {
+  //     a[i][0] = a0[i][0] + defocus[k];
+  //   }
+    for (int i = 0; i < INPUT.num_datas; i++) {
+      a1 = dis(random);
+      OPT::Init_Phase(INPUT, opt, a1, a, i, INPUT.Phase_option,
+                      dir0); // add for "random" or "confirm"
+      OPT::numercial_diffraction(INPUT, a1, opt, dir0);
+      cout << i << endl;
+      for (int i = 0; i < INPUT.n_grid; i++) {
+        delete[] opt.ur[i];
+        delete[] opt.ui[i];
+      }
+      delete[] opt.ur;
+      delete[] opt.ui;
     }
-    delete[] opt.ur;
-    delete[] opt.ui;
-  }
-
-
+  // }
 
   for (int i = 0; i < num_n; i++) {
     delete[] a[i];
   }
   delete[] a;
 
-    for (int i = 0; i <INPUT.n_grid; i++) {
-      delete[] opt.ur0[i];
-      delete[] opt.ui0[i];
-    }
-    delete[] opt.ur0;
-    delete[] opt.ui0;
+  for (int i = 0; i < INPUT.n_grid; i++) {
+    delete[] opt.ur0[i];
+    delete[] opt.ui0[i];
+  }
+  delete[] opt.ur0;
+  delete[] opt.ui0;
   // time
   cout << "The run time is: " << (double)clock() / CLOCKS_PER_SEC << "s"
        << endl;
