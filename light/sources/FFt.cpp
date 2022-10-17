@@ -192,6 +192,7 @@ bool FFT::fft_initialize(const int mm, const int n, FFT& fft)
     outfile118.close();
     // cout << "km(100,4,3)" << fft.km[58][4][0] << endl;
     */
+    return true;
 }
 
 void FFT::itoc(const int ik, const int mm, int* kk)

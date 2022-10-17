@@ -14,7 +14,7 @@
 
 ## [Ch 1: Doc](doc/README.md)
 本目录主要介绍了程序所用的算法以及必要的程序说明文件。
- 1. [光束远场传输程序输入参数说明](doc/documentation.md)
+ 1. [光束远场传输程序输入参数说明](doc/input%20Chinese.md)
   * 介绍了光束远场传输模拟程序中所有输入参数的具体含义以及选择范围。
  2. [基于机器学习的波前相差感知程序说明]()  
   * 介绍了程序所选取的神经网络以及相对应的输入参数。
@@ -27,7 +27,7 @@
   * 程序运行方法。
   * <font size=3>光束远场传输程序的测试文档，其中包括`32*32`，`64*64`,`128*128`，`256*256`四种网格。需要输入`INPUT.txt`和Zernike系数`.dat`文件。
 运行方法：`bash test64.sh`
-[具体参数含义](doc/documentation.md)。</font></b>
+[具体参数含义](doc/input%20Chinese.md)。</font></b>
 ---
 ---
 ## [Ch 3: MachineLearning](machinelearning/README.md)
