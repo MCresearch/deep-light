@@ -32,10 +32,23 @@ from tensorflow.keras.models import Model
 import tensorflow as tf
 from xception import Xception
 ######################################
+import json
+with open("INPUT.json", 'r', encoding='utf-8') as fw:
+    injson = json.load(fw)
+
+rms = np.pi*injson['test']['rms']
+nsnapshot = injson['test']['nsnapshot']
+model_dir = injson['test']['model_dir'] # model dir
+intensity_dir = injson['test']['intensity_dir'] # Far-field light intensity path
+zernike_dir =injson['test']['zernike_dir'] # Zernike coefficients path
+dir = injson['test']['dir'] # File saving path
+'''
 rms = 1
-aaz = 20
 nsnapshot = 1000
 model_dir = "/home/xianyuer/data/35_xception_200000_rms1/35_128_1-100_midloop4_221007_200000_150.h5"
+intensity_dir = "/home/xianyuer/data/35_xception_200000_rms1/data/5_nor_outintensity.npy"
+zernike_dir ="/home/xianyuer/data/35_xception_200000_rms1/data/5_zernike_35.npy"
+'''
 model = Xception(input_shape = (128, 128,1),
                 pooling = 'avg',
                 backend=keras.backend,
@@ -48,9 +61,8 @@ model = Xception(input_shape = (128, 128,1),
 model.load_weights(model_dir)
 ############ data and epoch specification #################
 ##
-intensity_dir = "/home/xianyuer/data/35_xception_200000_rms1/data/5_nor_outintensity.npy"
-zernike_dir ="/home/xianyuer/data/35_xception_200000_rms1/data/5_zernike_35.npy"
-dir = "/home/xianyuer/data/35_xception_200000_rms1/test/"
+
+
 x = np.load(intensity_dir)
 y = np.load(zernike_dir)
 y = y[:,2:]

@@ -2,7 +2,34 @@ import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import json
+##########################################################
+with open("INPUT.json", 'r', encoding='utf-8') as fw:
+    injson = json.load(fw)
 
+nzernike = injson['analyse']['nzernike']
+option_zernike_corfficient = injson['analyse']['option_zernike_corfficient'] #Whether to analyze
+option_rms = injson['analyse']['option_rms'] #Whether to analyze
+option_intensity = injson['analyse']['option_intensity'] #Whether to analyze
+option_SR = injson['analyse']['option_SR'] #Whether to analyze
+framnum = injson['analyse']['framnum'] # The number of extracted frames
+nsnapshots = injson['analyse']['nsnapshots']
+distribution = injson['analyse']['distribution']
+n_grid = injson['analyse']['n_grid']
+m_grid = injson['analyse']['m_grid']
+rms = np.pi*injson['analyse']['rms']
+aaz = injson['analyse']['airyr']*injson['analyse']['xxz'] #aaz = airy * xxz
+aa0 = injson['analyse']['aa0'] # aa0 = xx0 * a0
+interval = injson['analyse']['interval'] # The number of color levels in the image
+
+dir = injson['analyse']['dir'] # File saving path
+real_zernike_dir = injson['analyse']['real_zernike_dir'] # real Zernike coefficients path
+predict_zernike_dir = injson['analyse']['predict_zernike_dir'] # predict Zernike coefficients path
+diff_zernike_dir = injson['analyse']['diff_zernike_dir'] # Residual Zernike coefficients path
+real_out_all_0_dir = injson['analyse']['real_out_all_0_dir'] # real far-field light intensity path
+diff_out_all_dir = injson['analyse']['diff_out_all_dir'] # Residual far-field light intensity path
+ideal_out_dir = injson['analyse']['ideal_out_dir'] # far-field light intensity path when Zernike coffients are 0
+'''
 nzernike = 35
 option_zernike_corfficient = 1
 option_rms = 1
@@ -19,13 +46,16 @@ aa0 = 1.2
 interval = 5
 
 dir = "/home/xianyuer/data/35_xception_200000_rms1/test/"
-
+real_zernike_dir = dir+"zernike_test_real.txt"
+predict_zernike_dir = dir+"zernike_test_predict.txt"
+diff_zernike_dir = dir+"zernike_test_diff.txt"
+real_out_all_0_dir = "/home/xianyuer/data/35_xception_200000_rms1/data/5_dl_down_intensity.dat"
+diff_out_all_dir = "/home/xianyuer/data/35_xception_200000_rms1/test/outintensity.npy"
+ideal_out_dir = "/home/xianyuer/data/35_xception_200000_rms1/test/ideal_dl_down_intensity.dat"
+'''
 ##############zernike  predict corfficient and real corfficient#############
 if option_zernike_corfficient == 1:
     
-    real_zernike_dir = dir+"zernike_test_real.txt"
-    predict_zernike_dir = dir+"zernike_test_predict.txt"
-
     real_zernike = np.loadtxt(real_zernike_dir)
     predict_zernike = np.loadtxt(predict_zernike_dir)
 
@@ -43,7 +73,7 @@ if option_zernike_corfficient == 1:
 
 ######################   rms   #################################
 if option_rms == 1:
-    diff_zernike = np.loadtxt(dir+"zernike_test_diff.txt")
+    diff_zernike = np.loadtxt(diff_zernike_dir)
     rms_real = np.zeros(nsnapshots)
     rms_diff = np.zeros(nsnapshots)
     for i in range(nsnapshots):
@@ -79,12 +109,12 @@ print("min",np.min(rms_diff))
 
 ###################### outintensity fig ############################
 if option_intensity == 1:
-    
-    real_out_all_0 = np.loadtxt("/home/xianyuer/data/35_xception_200000_rms1/data/5_dl_down_intensity.dat")
+
+    real_out_all_0 = np.loadtxt(real_out_all_0_dir)
     real_out_all = np.zeros((nsnapshots,128,128))
     for i in range(nsnapshots):
         real_out_all[i,:,:] = real_out_all_0[128*i:128*(i+1),:]
-    diff_out_all = np.load("/home/xianyuer/data/35_xception_200000_rms1/test/outintensity.npy")
+    diff_out_all = np.load(diff_out_all_dir)
 
     plt.figure(1, dpi=400)
     plt.contourf(real_out_all[framnum,:,:],levels=[i*interval for i in range(int(np.max(real_out_all[framnum,:,:])/interval + 2*interval))], cmap=plt.get_cmap('jet'))
@@ -108,7 +138,8 @@ if option_intensity == 1:
 
 ######################### SR ######################################33333
 # if option_SR == 1:
-ideal_out = np.loadtxt("/home/xianyuer/data/35_xception_200000_rms1/test/ideal_dl_down_intensity.dat")
+
+ideal_out = np.loadtxt(ideal_out_dir)
 ideal = np.max(ideal_out)
 max_real = 0
 max_diff = 0

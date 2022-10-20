@@ -1,4 +1,5 @@
 ######### parameters setting ########
+'''
 data_size = [200000, 10000, 30000, 100000]
 model_name = "35_128_1-100_midloop4"
 epoch = [150, 150, 150, 150]
@@ -10,7 +11,25 @@ input_model = False
 dir = "/data/home/scv1925/run/3_zhangxianyue/deep-light/35_rms1_200000/"
 #input_model = "./35_128_200000_50-100_midloop4_220718_200000_50.h5"
 #model_path = "0921_2_20210322_10_0.1_17000_300.h5"
+    
+intensity_dir = dir+"data/1_nor_outintensity.npy"
+zernike_dir = dir+"data/1_zernike_35.npy"
+'''
 #####################################
+import json
+with open("INPUT.json", 'r', encoding='utf-8') as fw:
+    injson = json.load(fw)
+
+data_size = injson['train']['data_size'] # snapshot
+model_name = injson['train']['model_name'] 
+epoch = injson['train']['epoch']
+batch_size = injson['train']['batch_size']
+seed = injson['train']['seed']
+data_time = injson['train']['data_time']
+input_model = injson['train']['input_model'] # False or model dir
+dir = injson['train']['dir'] # File saving path
+intensity_dir = injson['train']['intensity_dir'] # Far-field light intensity path
+zernike_dir = injson['train']['zernike_dir'] # Zernike coefficients path
 
 
 ######### import session #############
@@ -47,34 +66,7 @@ import tensorflow as tf
 from keras.callbacks import Callback
 from xception import Xception
 
-
-###################################
-'''
-class my_callback(Callback):
-    def __init__(self,dataGen,showTestDetail=True):
-        self.dataGen=dataGen
-        self.showTestDetail=showTestDetail
-        self.predhis = []
-        self.targets = []
-    def mape(self,y,predict):
-        diff = np.abs(np.array(y) - np.array(predict))
-        return np.mean(diff / y)
-    def on_epoch_end(self, epoch, logs=None):
-        x_test,y_test=next(self.dataGen)
-        prediction = self.model.predict(x_test)
-        self.predhis.append(prediction)
-        #print("Prediction shape: {}".format(prediction.shape))
-        #print("Targets shape: {}".format(y_test.shape))
-        if self.showTestDetail:
-            for index,item in enumerate(prediction):
-                print(item,"=====",y_test[index],"====",y_test[index]-item)
-        testLoss=self.mape(y_test,prediction)
-        print("test loss is :{}".format(testLoss))
-'''
 ############# data and epoch specification #################
-    
-intensity_dir = dir+"data/1_nor_outintensity.npy"
-zernike_dir = dir+"data/1_zernike_35.npy"
 
 x = np.load(intensity_dir)
 y = np.load(zernike_dir)
@@ -99,7 +91,7 @@ for i in range(1):
     
     ############ model specification ##############
     try:
-        if(input_model == False):
+        if(input_model == "False"):
             model = Xception(input_shape = (128, 128, 1),
                  pooling = 'avg',
                  backend=keras.backend,

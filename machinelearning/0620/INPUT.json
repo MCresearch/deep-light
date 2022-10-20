@@ -1,0 +1,48 @@
+{
+    "train":{
+    "data_size": [2000, 10000, 30000, 100000], 
+    "model_name": "35_128_1-10_midloop4", 
+    "epoch": [10, 150, 150, 150], 
+    "batch_size": 16, 
+    "seed": 12333345, 
+    "data_time": "221020", 
+    "input_model": "False", 
+    "dir": "./", 
+    "intensity_dir": "/home/xianyuer/data/35_xception_200000_rms1/data/5_nor_outintensity.npy", 
+    "zernike_dir": "/home/xianyuer/data/35_xception_200000_rms1/data/5_zernike_35.npy"
+    },
+
+    "test":{
+        "rms":1,
+        "nsnapshot":1000,
+        "model_dir":"/home/xianyuer/data/35_xception_200000_rms1/35_128_1-100_midloop4_221007_200000_150.h5",
+        "intensity_dir" : "/home/xianyuer/data/35_xception_200000_rms1/data/5_nor_outintensity.npy",
+        "zernike_dir" :"/home/xianyuer/data/35_xception_200000_rms1/data/5_zernike_35.npy",
+        "dir":"./"
+        },
+        
+        "analyse":{
+        "nzernike" : 35,
+        "option_zernike_corfficient" : 1,
+        "option_rms" : 1,
+        "option_intensity" : 1,
+        "option_SR" : 0,
+        "framnum": 10, 
+        "nsnapshots" : 1000,
+        "distribution" : "guass",
+        "n_grid" : 256,
+        "m_grid" : 128,
+        "rms" : 1,
+        "airyr" : "0.0061",
+        "xxz": 20,
+        "aa0" : 1.2,
+        "interval" : 5,
+        "dir" : "./",
+        "real_zernike_dir" : "zernike_test_real.txt",
+        "predict_zernike_dir" : "zernike_test_predict.txt",
+        "diff_zernike_dir" : "zernike_test_diff.txt",
+        "real_out_all_0_dir" : "/home/xianyuer/data/35_xception_200000_rms1/data/5_dl_down_intensity.dat",
+        "diff_out_all_dir" : "/home/xianyuer/data/35_xception_200000_rms1/test/outintensity.npy",
+        "ideal_out_dir" : "/home/xianyuer/data/35_xception_200000_rms1/test/ideal_dl_down_intensity.dat"
+        }
+}
