@@ -45,7 +45,7 @@ bool OPT::Init_Intensity(Input &INPUT, OPT &opt) {
       y = (j + 1 - INPUT.n1) * INPUT.dxy0;
       y2 = y * y;
       r2 = x2 + y2;
-      if (r2 < a02) {
+      if (r2 <= a02) {
         opt.ur0[i][j] = exp(-1 * pow(r2 / a02, INPUT.mgs));
         opt.ui0[i][j] = 0;
       }
