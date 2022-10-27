@@ -24,6 +24,7 @@ eeznk = injson['data']['eeznk']
 dir = injson['data']['dir']
 Phase_option = injson['data']['Phase_option']  ##"random" "confirm" 
 nsnapshot = injson['data']['nsnapshot'] 
+zernike_dir = injson['data']['zernike_dir'] 
 nxzz = a0*xx0
 ngrid = pow(2,mm)
 n1 = ngrid/2 + 1
@@ -82,7 +83,7 @@ for iss in range(nsnapshot):
         
     if Phase_option == "confirm":
     
-        cz_ = np.loadtxt("zernike35_7_4.txt")
+        cz_ = np.loadtxt(zernike_dir)
     
     for i in range(ngrid):
         for j in range(ngrid):
@@ -169,3 +170,4 @@ cz = np.float32(cz)
 far_field_intens = np.float32(far_field_intens)
 np.save("./data/zernike.npy",cz)
 np.save("./data/far_field_intens.npy",far_field_intens)
+np.save("./data/far_field_intens_orig.npy",far_field_intens_orig)
