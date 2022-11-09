@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 import sys
 sys.path.append("../../")
 from Zernike import *
-from fun import *
 import time
 import json
 from propagation import *
