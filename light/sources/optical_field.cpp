@@ -446,7 +446,7 @@ ifs2.close();
       down_intensity[i / 2][j / 2] = max;
     }
   }
-  output_ur(128, dir0 + "dl_down_intensity.dat", 1, down_intensity);
+  output_ur(INPUT.n_grid/2, dir0 + "dl_down_intensity.dat", 1, down_intensity);
 
   delete[] hr;
   delete[] hi;
