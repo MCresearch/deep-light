@@ -39,9 +39,18 @@ dxyz = aaz/ngrid
 ngrid2 = ngrid//2
 a02 = a0*a0
 
-nsnapshot = 100
+nsnapshot = 5000
 mm = 8
 Phase_option = "ramdom"
+
+Zernike_alias = np.array([-1] 
+                            + [1] * 2
+                            + [-1] * 3
+                            + [1] * 4
+                            + [-1] * 5
+                            + [1] * 6
+                            + [-1] * 7
+                            + [1] * 8, dtype=np.float32)
 
 
 class Net(nn.Module):
@@ -76,7 +85,7 @@ class Net(nn.Module):
     h = self.mp(self.relu(self.conv5(h))) #[12x12]
     h = self.mp(self.relu(self.conv6(h))) #[6x6]
     h = h.view(in_size, -1)
-    print("h",np.shape(h))
+    # print("h",np.shape(h))
     h = self.relu(self.fc1(h))
     h = self.relu(self.fc2(h))
     out = self.fc3(h)
@@ -88,7 +97,7 @@ ngrid2 = ngrid//2
 
 ## Model
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
-#device = torch.device("cpu")
+# device = torch.device("cpu")
 model = Net()
 model = model.to(device)
 learning_rate = 0.0001
@@ -100,42 +109,45 @@ fid = open('train1.log', 'w')
 i = 0
 # Zer_torch = torch.tensor(Zer[3:, :, :]).to(device)
 # mask0_torch = torch.tensor(mask0).to(device)
-while 1:
+Zer = Zer1(maxZnkOrder,mm,a0,xx0)
+while i <= nsnapshot:
     i += 1
     # prepare minibatch
     #cz = np.random.normal(np.zeros(10), np.exp(-0.2*np.array([1,2,2,2,2,2,3,3,3,3])))
     time_start = time.time()
     init_intens = init_intensity(mm,a0,xx0,mgs)
-    Zer,cz = Zer(1,maxZnkOrder,mm,a0,xx0,"ramdom",eeznk,rms,zernike_dir)
+    #Zer,cz = Zer(1,maxZnkOrder,mm,a0,xx0,"random",eeznk,rms,zernike_dir)
+    cz = cc(1,maxZnkOrder,"random",eeznk,rms,zernike_dir)
     far_field_intens = progagtion(1,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer)
     time_end = time.time()
     img0_img = torch.tensor(np.float32(np.expand_dims(far_field_intens[0,:,:], [0,1]))).to(device) #[1,1,96,96]
-    print(np.shape(img0_img))
+    # print(np.shape(img0_img))
     # forward pass
     cz_pred = model(img0_img) #[10]
-    cz_1 = cz_pred+1-1
-    cz_2 = cz_1.detach().cpu().numpy()
-    cz_ = np.zeros((1,35))
-    cz_[0,2:] = cz_2
+    # cz_2 = cz_1.detach().cpu().numpy()
+    # cz_ = np.zeros((1,35))
+    # cz_[0,2:] = cz_pred
     # compute loss
     # Zer,cz = Zer(1,maxZnkOrder,mm,a0,xx0,"confirm",eeznk,rms,zernike_dir)
-    far_field_intens_pred = progagtion(1,mm,a0,xx0,plm,zfh,xxz,init_intens,cz_,Zer)
+    far_field_intens_pred = progagtion1(1,mm,a0,xx0,plm,zfh,xxz,init_intens,cz_pred,Zer)
     cz_pred.requires_grad_()
     img1_img = torch.tensor(np.float32(np.expand_dims(far_field_intens_pred[0,:,:], [0,1]))).to(device) #[1,1,96,96]
     loss = torch.sum(torch.abs(img1_img - img0_img))
+    loss.requires_grad_(True) 
     #loss = torch.sum(img0_img*torch.log(img1_img))
 
     # backward pass
     optimizer.zero_grad()
     loss.backward()
-
     # update weights
     optimizer.step()
 
     # monitor
     if i%1000 == 0:
-        loss_z1 = np.sum(np.abs(cz_pred.detach().cpu().numpy() - cz))
-        loss_z2 = np.sum(np.abs(cz_pred.detach().cpu().numpy()*Zernike_alias[3:] - cz))
+        print("cz",cz)
+        print("cz_pred",cz_pred)
+        loss_z1 = np.sum(np.abs(cz_pred.detach().cpu().numpy() - cz[:,2:]))
+        loss_z2 = np.sum(np.abs(cz_pred.detach().cpu().numpy()*Zernike_alias[3:] - cz[:,2:]))
         loss_zernike = np.minimum(loss_z1, loss_z2)
         print(' step:'+repr(i)+\
             ' loss:'+repr(round(loss.cpu().item(),4))+\
@@ -144,21 +156,20 @@ while 1:
             ' loss:'+repr(round(loss.cpu().item(),4))+\
             ' loss_zernike:'+repr(round(loss_zernike.item(),4)))
 
-        plt.subplot(2,2,1)
-        plt.imshow(np.imag(obj0)[ngrid2//2:ngrid-ngrid2//2, ngrid2//2:ngrid-ngrid2//2], vmin=-1, vmax=1, cmap='seismic')
-        plt.subplot(2,2,2)
-        plt.imshow(np.imag(obj1.detach().cpu().numpy())[ngrid2//2:ngrid-ngrid2//2, ngrid2//2:ngrid-ngrid2//2], vmin=-1, vmax=1, cmap='seismic')
+        # plt.subplot(2,2,1)
+        # plt.imshow(np.imag(obj0)[ngrid2//2:ngrid-ngrid2//2, ngrid2//2:ngrid-ngrid2//2], vmin=-1, vmax=1, cmap='seismic')
+        # plt.subplot(2,2,2)
+        # plt.imshow(np.imag(obj1.detach().cpu().numpy())[ngrid2//2:ngrid-ngrid2//2, ngrid2//2:ngrid-ngrid2//2], vmin=-1, vmax=1, cmap='seismic')
 
-        plt.subplot(2,2,3)
-        plt.imshow( np.abs(img0)**2 + 0.01*np.random.rand(96,96), vmin=0, vmax=0.3, cmap = "jet")
-        plt.subplot(2,2,4)
-        plt.imshow( np.abs(img1.detach().cpu().numpy())**2, vmin=0, vmax=0.3, cmap = "jet")
+        # plt.subplot(2,2,3)
+        # plt.imshow( np.abs(img0)**2 + 0.01*np.random.rand(96,96), vmin=0, vmax=0.3, cmap = "jet")
+        # plt.subplot(2,2,4)
+        # plt.imshow( np.abs(img1.detach().cpu().numpy())**2, vmin=0, vmax=0.3, cmap = "jet")
+        # plt.savefig('train.png')
+        # plt.close()
 
-        plt.savefig('train.png')
-        plt.close()
-
-    if i%(1e5) == 0:
-        torch.save(model.state_dict(), 'save_step'+repr(i//100000)+'e5.pt')
+    if i%(1000) == 0:
+        torch.save(model.state_dict(), 'save_step'+repr(i//1000)+'e5.pt')
 
 
 

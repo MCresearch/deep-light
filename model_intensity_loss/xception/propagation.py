@@ -199,6 +199,7 @@ def progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
                 down_intens[iss,i//2,j//2] = max
     
     far_field_intens = down_intens
+
         # cz = np.float32(cz)
         # far_field_intens = np.float32(far_field_intens)
     return far_field_intens
