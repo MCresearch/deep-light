@@ -2,13 +2,14 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import sys
-sys.path.append("../../")
 from Zernike import *
 from fun import *
 import time
 import json
 import numba
 from numba import jit
+import torch
+
 def init_intensity(mm,a0,xx0,mgs):
 
     ngrid = pow(2,mm)
@@ -102,9 +103,8 @@ def cc(nsnapshot,maxZnkOrder,Phase_option,eeznk,rms,zernike_dir):
         
     return cz_
 
-# @jit(nopython=True)
-def progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
 
+def progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
     nxzz = a0*xx0
     ngrid = pow(2,mm)
     n1 = ngrid/2 + 1
@@ -115,57 +115,51 @@ def progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
     dxyz = aaz/ngrid
     ngrid2 = ngrid//2
     a02 = a0*a0
-
-    far_field_intens_orig = np.zeros((nsnapshot,ngrid, ngrid))
-    far_field_intens = np.zeros((nsnapshot,ngrid2, ngrid2))
-    down_intens = np.zeros((nsnapshot,ngrid2, ngrid2))
-    cz_ = cz
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    far_field_intens_orig = torch.zeros((nsnapshot,ngrid, ngrid)).to(device)
+    down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))
     for iss in range(nsnapshot):
-        phi0 = np.zeros((ngrid, ngrid))
+        phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
         for i in range(ngrid):
             for j in range(ngrid):
                 r2 = gx[i,j]*gx[i,j]+gy[i,j]*gy[i,j]
                 if r2/a02 <= 1:
-                    phi0[i,j] = phi0[i,j] + np.sum(Zer[i,j,3:]*cz_[iss,2:])
-        # print("phi0",phi0) 
-        # print("1111")         
+                    phi0[i,j] = phi0[i,j] + torch.sum(Zer[i,j,3:]*cz[iss,:])
+        # obj0_ = torch.zeros(ngrid,ngrid) + 1j*torch.zeros(ngrid,ngrid)   
+              
         # propagation calculation
-        obj0_ = init_intens*np.exp(1j*phi0) # initial field
+        obj0_ = init_intens*torch.exp(1j*phi0) # initial field
+
         dlta = (1-aaz/aa0)/zfh
         ddxz = 1-dlta*zfh
         dk0 = 1/aa0
         zzzz = zfh/(1-dlta*zfh)
-        wave_number = 2*np.pi/plm
-        
+        wave_number = 2*torch.pi/plm
         ################## focusing ###################
         ei = -wave_number*(gx*gx+gy*gy)/2*(1/zfh)
-        img0_ = obj0_*np.exp(1j*ei) #focusing
-        # for i in range(ngrid):
-        #     for j in range(ngrid):
-        #         int_focusing[i,j] = pow(img0_.imag[i,j],2)+pow(img0_.real[i,j],2)
-        # int_focusing = pow(img0_.imag,2)+pow(img0_.real,2)
-        
+        ei = torch.tensor(ei).to(device)
+        img0_ = obj0_*torch.exp(1j*ei) #focusing
+   
         ############## mdfph #################
         ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2
-        img0_ = img0_*np.exp(1j*ec) #mdfph
-        # int_mdfph = pow(img0_.imag,2)+pow(img0_.real,2)
+        ec = torch.tensor(ec).to(device)
+        img0_ = img0_*torch.exp(1j*ec) #mdfph
+
         ############# fft #################
-        img0_ = np.fft.fft2(img0_)
-        # img0_ = fftt(img0_)
-        img0_= np.concatenate([\
-                np.concatenate([img0_[ngrid2:ngrid, ngrid2:ngrid], img0_[0:ngrid2, ngrid2:ngrid]], axis=0),\
-                np.concatenate([img0_[ngrid2:ngrid, 0:ngrid2], img0_[0:ngrid2, 0:ngrid2]], axis=0),\
-                                ], axis=1) # far field
-    
+        img0_ = torch.fft.fft2(img0_)
+        img0_= torch.concat([\
+        torch.concat([img0_[ngrid2:ngrid, ngrid2:ngrid], img0_[0:ngrid2, ngrid2:ngrid]], axis=0),\
+        torch.concat([img0_[ngrid2:ngrid, 0:ngrid2], img0_[0:ngrid2, 0:ngrid2]], axis=0),\
+                        ], axis=1) # far field
         ######## far field transmission ########
-        h = np.zeros(ngrid)
+        h = torch.zeros(ngrid)
         prop1(ngrid,n1,zzzz,wave_number,aa0,h)
+        h = torch.tensor(h).to(device)
         evol1(ngrid,h,img0_)
-        
+     
         ####### fft ############
-        img0_ = np.fft.ifft2(img0_)
-        # img0_ = fftt2(img0_)
+        img0_ = torch.fft.ifft2(img0_)
         AA = np.ones((ngrid, ngrid))
         for i in range(ngrid):
             for j in range(ngrid):
@@ -175,40 +169,33 @@ def progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
                 else:
                     if(j%2==0):
                         AA[i,j] = -1.0 
+        AA = torch.tensor(AA).to(device)
         img0_ = img0_*AA
+ 
+        # img0_.real[0,0]=-0.000105
+        # img0_.real[0,1]=0.011373
+        # img0_.real[1,0]=0.011373
+        # img0_.real[1,1]=0.101484
         
+        # img0_.imag[0,0]=0.000366
+        # img0_.imag[0,1]=0.003268
+        # img0_.imag[1,0]=0.003268
+        # img0_.imag[1,1]=-0.353208	
+        # print(img0_)
         ######## mdfph ############
         gy2,gx2 = np.meshgrid(dxyz*np.linspace(1-n1,ngrid-n1,ngrid),dxyz*np.linspace(1-n1,ngrid-n1,ngrid))
-        ec = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy*gy*dlta/(2*ddxz)
-        img0_ = img0_*np.exp(1j*ec) #mdfph
+        ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy*gy*dlta/(2*ddxz)
+        ez = torch.tensor(ez).to(device)
+        img0_ = img0_*torch.exp(1j*ez) #mdfph
         img0_ = img0_/ddxz
         
-        int_out = np.abs(img0_)**2
+        int_out = torch.abs(img0_)**2
+
         far_field_intens_orig[iss,:,:] = int_out
-        ###### down sample ################## 
-        max = 0
-        for i in range(0,ngrid,2):
-            for j in range(0,ngrid,2):
-                max = int_out[i,j]
-                if max < int_out[i,j+1]:
-                    max = int_out[i,j + 1]
-                if max < int_out[i+1,j]:
-                    max = int_out[i+1,j]
-                if max < int_out[i+1,j+1]:
-                    max = int_out[i+1,j + 1]     
-                down_intens[iss,i//2,j//2] = max
-    
-    far_field_intens = down_intens
-        # cz = np.float32(cz)
-        # far_field_intens = np.float32(far_field_intens)
-    return far_field_intens
-        # np.save("./data/zernike.npy",cz)
-        # np.save("./data/far_field_intens.npy",far_field_intens)
-        # np.save("./data/far_field_intens_orig.npy",far_field_intens_orig)
-    
+    return far_field_intens_orig
 
-def progagtion1(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
-
+def nor_progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
+    nxzz = a0*xx0
     ngrid = pow(2,mm)
     n1 = ngrid/2 + 1
     aa0 = xx0*a0
@@ -218,57 +205,50 @@ def progagtion1(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
     dxyz = aaz/ngrid
     ngrid2 = ngrid//2
     a02 = a0*a0
-    
-    far_field_intens_orig = np.zeros((nsnapshot,ngrid, ngrid))
-    far_field_intens =  np.zeros((nsnapshot,ngrid2, ngrid2))
-    down_intens =  np.zeros((nsnapshot,ngrid2, ngrid2))
-    cz_ = cz.detach().cpu().numpy()
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    far_field_intens_orig = torch.zeros((nsnapshot,ngrid, ngrid)).to(device)
+    down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))
     for iss in range(nsnapshot):
-        phi0 = np.zeros((ngrid, ngrid))
+        phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
         for i in range(ngrid):
             for j in range(ngrid):
                 r2 = gx[i,j]*gx[i,j]+gy[i,j]*gy[i,j]
                 if r2/a02 <= 1:
-                    phi0[i,j] = phi0[i,j] + np.sum(Zer[i,j,3:]*cz_[iss,:])
-        # print("phi0",phi0) 
-        # print("1111")         
+                    phi0[i,j] = phi0[i,j] + torch.sum(Zer[i,j,3:]*cz[iss,:])
+        # obj0_ = torch.zeros(ngrid,ngrid) + 1j*torch.zeros(ngrid,ngrid)   
+              
         # propagation calculation
-        obj0_ = init_intens*np.exp(1j*phi0) # initial field
+        obj0_ = init_intens*torch.exp(1j*phi0) # initial field
+
         dlta = (1-aaz/aa0)/zfh
         ddxz = 1-dlta*zfh
         dk0 = 1/aa0
         zzzz = zfh/(1-dlta*zfh)
-        wave_number = 2*np.pi/plm
-        
+        wave_number = 2*torch.pi/plm
         ################## focusing ###################
         ei = -wave_number*(gx*gx+gy*gy)/2*(1/zfh)
-        img0_ = obj0_*np.exp(1j*ei) #focusing
-        # for i in range(ngrid):
-        #     for j in range(ngrid):
-        #         int_focusing[i,j] = pow(img0_.imag[i,j],2)+pow(img0_.real[i,j],2)
-        # int_focusing = pow(img0_.imag,2)+pow(img0_.real,2)
-        
+        ei = torch.tensor(ei).to(device)
+        img0_ = obj0_*torch.exp(1j*ei) #focusing
+   
         ############## mdfph #################
         ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2
-        img0_ = img0_*np.exp(1j*ec) #mdfph
-        # int_mdfph = pow(img0_.imag,2)+pow(img0_.real,2)
+        ec = torch.tensor(ec).to(device)
+        img0_ = img0_*torch.exp(1j*ec) #mdfph
+
         ############# fft #################
-        img0_ = np.fft.fft2(img0_)
-        # img0_ = fftt(img0_)
-        img0_= np.concatenate([\
-                np.concatenate([img0_[ngrid2:ngrid, ngrid2:ngrid], img0_[0:ngrid2, ngrid2:ngrid]], axis=0),\
-                np.concatenate([img0_[ngrid2:ngrid, 0:ngrid2], img0_[0:ngrid2, 0:ngrid2]], axis=0),\
-                                ], axis=1) # far field
-    
+        img0_ = torch.fft.fft2(img0_)
+        img0_= torch.concat([\
+        torch.concat([img0_[ngrid2:ngrid, ngrid2:ngrid], img0_[0:ngrid2, ngrid2:ngrid]], axis=0),\
+        torch.concat([img0_[ngrid2:ngrid, 0:ngrid2], img0_[0:ngrid2, 0:ngrid2]], axis=0),\
+                        ], axis=1) # far field
         ######## far field transmission ########
-        h = np.zeros(ngrid)
+        h = torch.zeros(ngrid)
         prop1(ngrid,n1,zzzz,wave_number,aa0,h)
         evol1(ngrid,h,img0_)
-        
+     
         ####### fft ############
-        img0_ = np.fft.ifft2(img0_)
-        # img0_ = fftt2(img0_)
+        img0_ = torch.fft.ifft2(img0_)
         AA = np.ones((ngrid, ngrid))
         for i in range(ngrid):
             for j in range(ngrid):
@@ -278,17 +258,118 @@ def progagtion1(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
                 else:
                     if(j%2==0):
                         AA[i,j] = -1.0 
+        AA = torch.tensor(AA).to(device)
         img0_ = img0_*AA
+ 
+        # img0_.real[0,0]=-0.000105
+        # img0_.real[0,1]=0.011373
+        # img0_.real[1,0]=0.011373
+        # img0_.real[1,1]=0.101484
         
+        # img0_.imag[0,0]=0.000366
+        # img0_.imag[0,1]=0.003268
+        # img0_.imag[1,0]=0.003268
+        # img0_.imag[1,1]=-0.353208	
+        # print(img0_)
         ######## mdfph ############
         gy2,gx2 = np.meshgrid(dxyz*np.linspace(1-n1,ngrid-n1,ngrid),dxyz*np.linspace(1-n1,ngrid-n1,ngrid))
-        ec = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy*gy*dlta/(2*ddxz)
-        img0_ = img0_*np.exp(1j*ec) #mdfph
+        ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy*gy*dlta/(2*ddxz)
+        ez = torch.tensor(ez).to(device)
+        img0_ = img0_*torch.exp(1j*ez) #mdfph
         img0_ = img0_/ddxz
         
-        int_out = np.abs(img0_)**2
+        int_out = torch.abs(img0_)**2
+        far_field_intens_orig[iss,:,:] = int_out/torch.max(int_out)
+    return far_field_intens_orig
+
+def nor_down_progagtion(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
+    nxzz = a0*xx0
+    ngrid = pow(2,mm)
+    n1 = ngrid/2 + 1
+    aa0 = xx0*a0
+    dxy0 = aa0/ngrid
+    airy = 1.22*plm*zfh/(2*a0)
+    aaz = airy*xxz
+    dxyz = aaz/ngrid
+    ngrid2 = ngrid//2
+    a02 = a0*a0
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    far_field_intens_orig = torch.zeros((nsnapshot,ngrid, ngrid)).to(device)
+    down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
+    gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))
+    for iss in range(nsnapshot):
+        phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
+        for i in range(ngrid):
+            for j in range(ngrid):
+                r2 = gx[i,j]*gx[i,j]+gy[i,j]*gy[i,j]
+                if r2/a02 <= 1:
+                    phi0[i,j] = phi0[i,j] + torch.sum(Zer[i,j,3:]*cz[iss,:])
+        # obj0_ = torch.zeros(ngrid,ngrid) + 1j*torch.zeros(ngrid,ngrid)   
+              
+        # propagation calculation
+        obj0_ = init_intens*torch.exp(1j*phi0) # initial field
+
+        dlta = (1-aaz/aa0)/zfh
+        ddxz = 1-dlta*zfh
+        dk0 = 1/aa0
+        zzzz = zfh/(1-dlta*zfh)
+        wave_number = 2*torch.pi/plm
+        ################## focusing ###################
+        ei = -wave_number*(gx*gx+gy*gy)/2*(1/zfh)
+        ei = torch.tensor(ei).to(device)
+        img0_ = obj0_*torch.exp(1j*ei) #focusing
+   
+        ############## mdfph #################
+        ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2
+        ec = torch.tensor(ec).to(device)
+        img0_ = img0_*torch.exp(1j*ec) #mdfph
+
+        ############# fft #################
+        img0_ = torch.fft.fft2(img0_)
+        img0_= torch.concat([\
+        torch.concat([img0_[ngrid2:ngrid, ngrid2:ngrid], img0_[0:ngrid2, ngrid2:ngrid]], axis=0),\
+        torch.concat([img0_[ngrid2:ngrid, 0:ngrid2], img0_[0:ngrid2, 0:ngrid2]], axis=0),\
+                        ], axis=1) # far field
+        ######## far field transmission ########
+        h = torch.zeros(ngrid)
+        prop1(ngrid,n1,zzzz,wave_number,aa0,h)
+        h = torch.tensor(h).to(device)
+        evol1(ngrid,h,img0_)
+     
+        ####### fft ############
+        img0_ = torch.fft.ifft2(img0_)
+        AA = np.ones((ngrid, ngrid))
+        for i in range(ngrid):
+            for j in range(ngrid):
+                if(i%2==0):
+                    if(j%2!=0):
+                        AA[i,j] = -1.0    
+                else:
+                    if(j%2==0):
+                        AA[i,j] = -1.0 
+        AA = torch.tensor(AA).to(device)
+        img0_ = img0_*AA
+ 
+        # img0_.real[0,0]=-0.000105
+        # img0_.real[0,1]=0.011373
+        # img0_.real[1,0]=0.011373
+        # img0_.real[1,1]=0.101484
+        
+        # img0_.imag[0,0]=0.000366
+        # img0_.imag[0,1]=0.003268
+        # img0_.imag[1,0]=0.003268
+        # img0_.imag[1,1]=-0.353208	
+        # print(img0_)
+        ######## mdfph ############
+        gy2,gx2 = np.meshgrid(dxyz*np.linspace(1-n1,ngrid-n1,ngrid),dxyz*np.linspace(1-n1,ngrid-n1,ngrid))
+        ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy*gy*dlta/(2*ddxz)
+        ez = torch.tensor(ez).to(device)
+        img0_ = img0_*torch.exp(1j*ez) #mdfph
+        img0_ = img0_/ddxz
+        
+        int_out = torch.abs(img0_)**2
+
         far_field_intens_orig[iss,:,:] = int_out
-        ###### down sample ################## 
         max = 0
         for i in range(0,ngrid,2):
             for j in range(0,ngrid,2):
@@ -300,11 +381,5 @@ def progagtion1(nsnapshot,mm,a0,xx0,plm,zfh,xxz,init_intens,cz,Zer):
                 if max < int_out[i+1,j+1]:
                     max = int_out[i+1,j + 1]     
                 down_intens[iss,i//2,j//2] = max
-    
-    far_field_intens = down_intens
-        # cz = np.float32(cz)
-        # far_field_intens = np.float32(far_field_intens)
-    return far_field_intens
-        # np.save("./data/zernike.npy",cz)
-        # np.save("./data/far_field_intens.npy",far_field_intens)
-        # np.save("./data/far_field_intens_orig.npy",far_field_intens_orig)
+        down_intens[iss,:,:] = down_intens[iss,:,:]/torch.max(down_intens[iss,:,:])
+    return down_intens

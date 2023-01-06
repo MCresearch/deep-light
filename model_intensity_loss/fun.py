@@ -1,8 +1,9 @@
 import numba
 from numba import jit
 import numpy as np
+import torch
 
-@jit(nopython=True)
+
 def prop1(n_grid,n1,dz,kp,aa,h):
     tt = 0.0
     t0 = 0.0
@@ -13,13 +14,12 @@ def prop1(n_grid,n1,dz,kp,aa,h):
         t0 = tt * j1 * j1
         h[j] = -t0
 
-@jit(nopython=True)
+
 def evol1(n_grid, h, img0_):
-    cx = 0.0
     for i in range(n_grid):
         for j in range(n_grid):
-            img0_[i,j] = img0_[i,j]*np.exp(1j*h[i])
-            img0_[i,j] = img0_[i,j]*np.exp(1j*h[j])
+            img0_[i,j] = img0_[i,j]*torch.exp(1j*h[i])
+            img0_[i,j] = img0_[i,j]*torch.exp(1j*h[j])
 
 def fftt(img0):
     img0_ = np.fft.fft2(img0)
