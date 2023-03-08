@@ -1,20 +1,7 @@
 # 光束远场传输模拟程序使用方法
 所有操作在light目录下进行
-## step1： 生成指定阶数分布的Zernike系数矩阵
-输入参数：
-```python
-nsnapshots = 10000 # 指定帧数
-nbatch = 1 # 分成nbatch个dat文件生成
-nzernike = 65 # zernike阶数
-low = -0.5 # zernike分布下限
-high = 0.5 # zernike分布上限
-date = "220623_0.5" 
-```
-运行命令： `python aznk_generate.py`；
 
-输出： 在data文件夹中生成系数矩阵的.dat和.npy文件。
-
-## step2： 生成远场
+## step1： 生成远场
 
 进入`tests`文件夹内相应网格的文件夹，以`64_64`为例，
 
@@ -24,7 +11,7 @@ date = "220623_0.5"
 
 输出：相应.dat数据输出在`64_64`文件夹内。
 
-## step3： 将远场光强的.dat文件组装为机器学习所需的.npy文件
+## step2： 将远场光强的.dat文件组装为机器学习所需的.npy文件
 
 进入`tests`文件夹内相应网格的文件夹，以`64_64`为例，
 
