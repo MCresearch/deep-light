@@ -23,16 +23,16 @@ import random
 from Xception_model import *
 #https://blog.csdn.net/BernardDong/article/details/125495796
 ######### parameters setting ########
-model_name = "0228_35_3456789_64_100_b16_gauss1loss_rms4_changeloss_e200000"
-model_path = "/home/xianyuer/yuer/testwej/deep-light/model_intensity_loss/repro/zer9_rms4/model/35_3456789_64_100_b1_gauss1loss_rms4_changeloss_200000.pt"
-epoch = 200000
-batch_size = 16
+model_name = "0322_35_128_200_64_4_8" # date_ZernikeOrder_ngrid(d2for downsample)_epochs_batch_rms_learningrate(3to8:1e-3~1e-8)
+model_path = "./model/0322_35_128_400_32_4_7.pt"
+epoch = 200
+batch_size = 64
 #batch_size=8
 seed = 12333345
 data_time = "220223"
 input_model = False
 dir = "./"
-mgs_guass = 1
+mgs_guass = 0
 #####################################
 fid = open(model_name+'.log', 'w')
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
@@ -51,10 +51,10 @@ maxZnkOrder = injson['data']['maxZnkOrder']
 rms = injson['data']['rms']
 eeznk = injson['data']['eeznk']
 zernike_dir = injson['data']['dir']
-maxZnkOrder = 3
-xxz = 25
+maxZnkOrder = 7
+xxz = 36
 
-Zernike_alias = np.array([-1] * 3 + [1] * 4, dtype=np.float32)
+Zernike_alias = np.array([-1] * 3 + [1] * 4 + [-1] * 5 + [1] * 6 + [-1] * 7 + [1] * 8, dtype=np.float32)
 Zernike_alias  = torch.tensor(Zernike_alias).to(device)
 Zer = Zer1(maxZnkOrder,mm,a0,xx0)
 Zer = torch.tensor(Zer).to(device)
@@ -107,7 +107,8 @@ gauss  = torch.tensor(gauss).to(device)
 def fit(net,batch_size,epochs,learning_rate,Zernike_alias,ngrid,ngrid2,init_intens,Zer,mask0,f_m,h_sum,ez,ddxz,gauss):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
     opt = torch.optim.Adam(net.parameters(), lr=learning_rate) 
-    Zernike_alias_0 = torch.zeros((batch_size,7)).to(device)  
+    # scheduler = torch.optim.lr_scheduler.StepLR(opt, step_size = epochs/5, gamma=0.1)
+    Zernike_alias_0 = torch.zeros((batch_size,33)).to(device)  
     for i in range(batch_size):
         Zernike_alias_0[i,:] = Zernike_alias
     #损失函数
@@ -124,7 +125,7 @@ def fit(net,batch_size,epochs,learning_rate,Zernike_alias,ngrid,ngrid2,init_inte
         y = y[:,2:]
         y = torch.tensor(y).to(device)
         x = nor_progagtion(batch_size,ngrid,ngrid2,init_intens,y,Zer,mask0,f_m,h_sum,ez,ddxz)
-        x = torch.reshape(x, [batch_size, 1, 64, 64]).to(device)  
+        x = torch.reshape(x, [batch_size, 1,128, 128]).to(device)  
         # 正向传播
         cz_pred = net(x)
         # change loss
@@ -132,10 +133,11 @@ def fit(net,batch_size,epochs,learning_rate,Zernike_alias,ngrid,ngrid2,init_inte
         # loss_z2 = torch.sum(pow(cz_pred*Zernike_alias - y,2))
         # if loss_z1>loss_z2:
         #     cz_pred = cz_pred * Zernike_alias
-        # # 计算损失
-        far_field_intens_pred =  nor_progagtion(batch_size,ngrid,ngrid2,init_intens,cz_pred,Zer,mask0,f_m,h_sum,ez,ddxz)
-        far_field_intens_pred = torch.reshape(far_field_intens_pred, [batch_size, 1, 64, 64]).to(device)  
-        loss = torch.mean(pow((far_field_intens_pred - x)*gauss,2))
+        # 计算损失
+        # far_field_intens_pred =  nor_progagtion(batch_size,ngrid,ngrid2,init_intens,cz_pred,Zer,mask0,f_m,h_sum,ez,ddxz)
+        # far_field_intens_pred = torch.reshape(far_field_intens_pred, [batch_size, 1, 128, 128]).to(device)  
+        # loss = torch.mean(pow((far_field_intens_pred - x)*gauss,2))
+        loss = criterion(cz_pred.float(),y.float())
         # 梯度清零
         opt.zero_grad()
         # 反向传播
@@ -171,7 +173,7 @@ net = Xception()
 net.load_state_dict(torch.load(model_path))
 net = net.to(device)
 # 学习率
-lr = 0.0001
+lr = 0.00000001
 
 fit(net, batch_size,epoch,lr,Zernike_alias,ngrid,ngrid2,init_intens,Zer,mask0,f_m,h_sum,ez,ddxz,gauss)
 

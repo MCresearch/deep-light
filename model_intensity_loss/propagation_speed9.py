@@ -25,42 +25,42 @@ def init_intensity(mm,a0,xx0,mgs):
 
     return init_intens
 
-# @jit(nopython=True)
-def Zer(nsnapshot,maxZnkOrder,mm,a0,xx0,Phase_option,eeznk,rms,zernike_dir):
+# # @jit(nopython=True)
+# def Zer(nsnapshot,maxZnkOrder,mm,a0,xx0,Phase_option,eeznk,rms,zernike_dir):
     
-    ngrid = pow(2,mm)
-    n1 = ngrid/2 + 1
-    aa0 = xx0*a0
-    dxy0 = aa0/ngrid
-    a02 = a0*a0
+#     ngrid = pow(2,mm)
+#     n1 = ngrid/2 + 1
+#     aa0 = xx0*a0
+#     dxy0 = aa0/ngrid
+#     a02 = a0*a0
     
-    maxZnkDim = maxZernike(maxZnkOrder)
-    print("maxZnkDim=",maxZnkDim)
-    Zernike_order = []
-    Zer = np.zeros((ngrid,ngrid,maxZnkDim+1))
-    cz_ = np.zeros((nsnapshot,maxZnkDim))
-    for iorder in range(0, maxZnkOrder+1):
-        Zernike_order += [iorder for ii in range(iorder+1)]
-    Zernike_order = np.array(Zernike_order)
+#     maxZnkDim = maxZernike(maxZnkOrder)
+#     print("maxZnkDim=",maxZnkDim)
+#     Zernike_order = []
+#     Zer = np.zeros((ngrid,ngrid,maxZnkDim+1))
+#     cz_ = np.zeros((nsnapshot,maxZnkDim))
+#     for iorder in range(0, maxZnkOrder+1):
+#         Zernike_order += [iorder for ii in range(iorder+1)]
+#     Zernike_order = np.array(Zernike_order)
 
-    # generate random phase and its corresponding far field intensity
-    gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))  
-    for i in range(ngrid):
-        for j in range(ngrid):
-            r2 = gx[i,j]*gx[i,j]+gy[i,j]*gy[i,j]
-            if r2/a02 <= 1:
-                Zer[i,j,:] = Zernike(maxZnkDim,gx[i,j]/a0,gy[i,j]/a0) # Zernike mode
-    for iss in range(nsnapshot):
-        if Phase_option == "random":   
-            cz_[iss,2:] = np.random.normal(np.zeros(maxZnkDim-2), np.exp(-eeznk*(Zernike_order[3:]-1)))
-            ss = np.sum(pow(cz_[iss,2:],2))
-            cz_[iss,2:] *= np.sqrt(rms/ss) # normalization factor
+#     # generate random phase and its corresponding far field intensity
+#     gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))  
+#     for i in range(ngrid):
+#         for j in range(ngrid):
+#             r2 = gx[i,j]*gx[i,j]+gy[i,j]*gy[i,j]
+#             if r2/a02 <= 1:
+#                 Zer[i,j,:] = Zernike(maxZnkDim,gx[i,j]/a0,gy[i,j]/a0) # Zernike mode
+#     for iss in range(nsnapshot):
+#         if Phase_option == "random":   
+#             cz_[iss,2:] = np.random.normal(np.zeros(maxZnkDim-2), np.exp(-eeznk*(Zernike_order[3:]-1)))
+#             ss = np.sum(pow(cz_[iss,2:],2))
+#             cz_[iss,2:] *= np.sqrt(rms/ss) # normalization factor
     
-    if Phase_option == "confirm":
-        cz_[:,2:] = np.loadtxt(zernike_dir)
-        print(cz_)
+#     if Phase_option == "confirm":
+#         cz_[:,2:] = np.loadtxt(zernike_dir)
+#         print(cz_)
         
-    return Zer,cz_
+#     return Zer,cz_
 
 def Zer1(maxZnkOrder,mm,a0,xx0):
     
@@ -109,7 +109,7 @@ def progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,ddxz
     down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     for iss in range(nsnapshot):
         phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
-        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,7]),2)
+        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,33]),2)
         obj0_ = mask0*init_intens*torch.exp(1j*phi0) # initial field
         ################## focusing ###################
         # img0_ = obj0_*torch.exp(1j*ei) #focusing
@@ -151,7 +151,7 @@ def nor_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,
     down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     for iss in range(nsnapshot):
         phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
-        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,7]),2)
+        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,33]),2)
         obj0_ = mask0*init_intens*torch.exp(1j*phi0) # initial field
         ################## focusing ###################
         # img0_ = obj0_*torch.exp(1j*ei) #focusing
@@ -193,7 +193,7 @@ def nor_down_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_su
     down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     for iss in range(nsnapshot):
         phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
-        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,7]),2)
+        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,33]),2)
         obj0_ = mask0*init_intens*torch.exp(1j*phi0) # initial field
         ################## focusing ###################
         # img0_ = obj0_*torch.exp(1j*ei) #focusing

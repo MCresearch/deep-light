@@ -16,6 +16,7 @@
 #         <name>       <type>        <description>
 #         $model_name  .log          History of loss
 #         $model_name  .pt           Model from machine learning
+#         $model_name  .png          Loss plot
 # History: 
 #         <author>     <version>     <time>			<description>
 #         Xianyuer     1.0           Unknown        Creat the file
@@ -100,7 +101,7 @@ Zernike_aliaslist = []
 for zi in range(3, maxZnkOrder+2):
     Zernike_aliaslist = Zernike_aliaslist + [pow(-1,zi)]*zi
 Zernike_alias = np.array(Zernike_aliaslist, dtype=np.float32) 
-Zernike_alias  = torch.tensor(Zernike_alias).to(device)
+Zernike_alias = torch.tensor(Zernike_alias).to(device)
 
 # Calculate the value of the Zernike function on the grid
 Zer = Zer1(maxZnkOrder, mm, a0, xx0) 
@@ -140,9 +141,9 @@ for i in range(ngrid):
 # Calculate the phase
 ei = -wave_number*(gx*gx+gy*gy)/2*(1/zfh) # Phase of initial field
 ei = torch.tensor(ei).to(device)
-ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2
+ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2 # phi(x,y,z=0), used in ACT
 ec = torch.tensor(ec).to(device)
-ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy2*gy2*dlta/(2*ddxz) # phi(x,y,z), used in ACT
+ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy2*gy2*dlta/(2*ddxz) # phi(x,y,z=f), used in ACT
 ez = torch.tensor(ez).to(device)
 f_m = torch.exp(1j*ei)*torch.exp(1j*ec)
 
@@ -161,7 +162,7 @@ gauss = torch.tensor(gauss).to(device)
 
 #------------ Training Process ------------#
 
-fid = open(model_name+'.log', 'w') # Record the training history
+fid = open('./history/'+model_name+'.log', 'w') # Record the training history
 
 def fit(net, batch_size, epochs, learning_rate, Zernike_alias, ngrid, ngrid2, init_intens, Zer, mask0, f_m, h_sum, ez, ddxz, Lr_gamma, Lr_step, gauss):
     # Model Setting
@@ -177,6 +178,9 @@ def fit(net, batch_size, epochs, learning_rate, Zernike_alias, ngrid, ngrid2, in
     samples = 0
     # Accuracy monitor
     corrects = 0
+    # Loss record
+    lossrecord = []
+    ir = 0
 
     # Train for some epochs
     for epoch in range(epochs):
@@ -230,8 +234,50 @@ def fit(net, batch_size, epochs, learning_rate, Zernike_alias, ngrid, ngrid2, in
                 fid.write(str(loss.cpu().item()))
             fid.write('\n')
 
+            # TEST PLOT #
+            plt.figure(1,figsize=(6,4))
+            plt.bar(np.array(range(maxZernike(maxZnkOrder)-2)),y.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
+            plt.bar(np.array(range(maxZernike(maxZnkOrder)-2)),cz_pred.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
+            plt.xlabel("Zernike", fontsize=15)
+            plt.ylabel("Value", fontsize=15)
+            plt.title("%d"%(ir), fontsize=15)
+            plt.legend()
+            plt.savefig("./history/%d.png"%(ir),bbox_inches='tight')
+            plt.close()
+
+            plt.figure(1, figsize=(16,4))
+            plt.subplot(131)
+            plt.contourf(x.detach().cpu().numpy()[0,0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
+            plt.colorbar()
+            plt.xlabel("x (m)",fontsize=15)
+            plt.ylabel("y (m)",fontsize=15)
+
+            far_field_intens_pred = nor_progagtion(batch_size,ngrid,ngrid2,init_intens,cz_pred,Zer,mask0,f_m,h_sum,ez,ddxz)
+
+            plt.subplot(132)
+            plt.contourf(far_field_intens_pred.detach().cpu().numpy()[0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
+            plt.colorbar()
+            plt.xlabel("x (m)",fontsize=15)
+            plt.ylabel("y (m)",fontsize=15)
+
+            mmmm = nor_progagtion(batch_size,ngrid,ngrid2,init_intens,y-cz_pred,Zer,mask0,f_m,h_sum,ez,ddxz)
+
+            plt.subplot(133)
+            plt.contourf(mmmm.detach().cpu().numpy()[0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
+            plt.colorbar()
+            plt.xlabel("x (m)",fontsize=15)
+            plt.ylabel("y (m)",fontsize=15)
+
+            plt.savefig("./history/int%d.png"%(ir),bbox_inches='tight')
+            plt.close()
+            # TEST PLOT END #
+            
+            lossrecord.append(float(loss.cpu().item()))
+            ir = ir + 1
+
     # Model save
     torch.save(net.state_dict(), './model/'+model_name+'.pt')
+    return lossrecord, ir
 
 # Set the random number seed
 torch.manual_seed(51)
@@ -242,5 +288,13 @@ if input_model == 1:
     net.load_state_dict(torch.load(model_path))
 net = net.to(device)
 
-fit(net, batch_size, epoch, lr, Zernike_alias, ngrid, ngrid2, init_intens, Zer, mask0, f_m, h_sum, ez, ddxz, lr_gamma, lr_step, gauss)
+lossrecord, ir = fit(net, batch_size, epoch, lr, Zernike_alias, ngrid, ngrid2, init_intens, Zer, mask0, f_m, h_sum, ez, ddxz, lr_gamma, lr_step, gauss)
 fid.close()
+
+plt.figure(1,figsize=(6,4))
+plt.plot(np.array(range(0,ir)), np.array(lossrecord), label="loss")
+plt.xlabel("Epoch (*100)", fontsize=15)
+plt.ylabel("Loss", fontsize=15)
+plt.title("Loss of model %s"%(model_name), fontsize=15)
+plt.legend()
+plt.savefig("./history/"+model_name+".png",bbox_inches='tight')

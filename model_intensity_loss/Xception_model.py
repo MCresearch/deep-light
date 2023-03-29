@@ -1,15 +1,58 @@
-#导入包
+# !/usr/bin/env python
+# -*- encoding: utf-8 -*- #
+ 
+# ----------------------------------------------------------------------------------------------------------
+# File Name:        Xception_model.py
+# Author:           Xianyuer
+# Version:          1.0
+# Created:          2023/03/22 19:17:08
+# Description:      Main Function: Xception model
+#                   Cross Reference: NONE
+# Function List:    None for outer use
+# Input List:
+#         <name>       <type>        <description>
+#         INPUT        .json         All input parameters
+# Output List:
+#         <name>       <type>        <description>
+#         __NONE__     ---           ---
+# History: 
+#         <author>     <version>     <time>			<description>
+#         Xianyuer     1.0           2023/03/22		XXX
+# ----------------------------------------------------------------------------------------------------------
+
+#------------ Load Package ------------#
+
+####### Package: Commonly used #######
 import numpy as np
+import json
+
+####### Package: Scikit-Learn #######
 # import sklearn
 # from sklearn.model_selection import train_test_split
 # from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder,MinMaxScaler, StandardScaler
+
+####### Package: Pytorch #######
 import torch.nn as nn
 import torch.nn.functional as F
 import torch
 from torch import optim
 from torch.utils.data import Dataset,DataLoader
 from torchinfo import summary
+
+
+#------------ Load & Set Parameters ------------#
+
+####### Load Input File #######
+with open("INPUT.json", 'r', encoding='utf-8') as fw:
+    injson = json.load(fw)
+
+####### Load Parameters for Pysical Model #######
+maxZnkOrder = injson['Train']['PM']['maxZnkOrder'] # Maximum Order of the Zernike Polynomial
+datadim = maxZnkOrder*(maxZnkOrder+3)//2-2
+
+
+#------------ Model Construction ------------#
 
 class SeparableConv(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size=1, stride=1, padding=0, dilation=1):
@@ -75,7 +118,7 @@ class Block(nn.Module):
 
 
 class Xception(nn.Module):
-    def __init__(self, num_classes=7):
+    def __init__(self, num_classes=datadim):
 
         super(Xception, self).__init__()
 

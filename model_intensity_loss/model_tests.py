@@ -24,7 +24,7 @@ from Xception_model import *
 import os
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
 
-model_name = "test"
+model_name = "TEST1_rms8"
 if os.path.exists(model_name):
     print("文件已经存在")
 else:
@@ -33,15 +33,15 @@ else:
 dir = "./"+model_name+"/"
 print(dir)
 
-model_path = "/home/xianyuer/yuer/testwej/deep-light/model_intensity_loss/repro/zer9_rms4/model/0228_35_3456789_64_100_b2_gauss1loss_rms4_changeloss_e200000_lr0.0002.pt"
+model_path = "./model/0313_35_128_30000_16_4_5to8.pt"
 batch_size = 1
 #batch_size=8
 seed = 12333345
 data_time = "220223"
 input_model = False
 mgs_guass = 1
-snapshoot = 1000
-nzer = 7
+snapshoot = 100
+nzer = 33
 with open("INPUT_64.json", 'r', encoding='utf-8') as fw:
         injson = json.load(fw)
 mm = injson['data']['mm'] 
@@ -56,10 +56,10 @@ maxZnkOrder = injson['data']['maxZnkOrder']
 rms = injson['data']['rms']
 eeznk = injson['data']['eeznk']
 zernike_dir = injson['data']['dir']
-maxZnkOrder = 3
-xxz = 25
+maxZnkOrder = 7
+xxz = 36
 
-Zernike_alias = np.array([-1] * 3 + [1] * 4, dtype=np.float32)
+Zernike_alias = np.array([-1] * 3 + [1] * 4 + [-1] * 5 + [1] * 6 + [-1] * 7 + [1] * 8, dtype=np.float32)
 Zernike_alias  = torch.tensor(Zernike_alias).to(device)
 Zer = Zer1(maxZnkOrder,mm,a0,xx0)
 Zer = torch.tensor(Zer).to(device)
@@ -118,7 +118,7 @@ loss_int= torch.zeros([snapshoot,1],dtype=torch.float).to(device)
 loss_zer= torch.zeros([snapshoot,nzer],dtype=torch.float).to(device)
 y_predict_choose = torch.zeros([snapshoot,nzer],dtype=torch.float).to(device)
 rms_save = torch.zeros([snapshoot,2],dtype=torch.float).to(device)
-x_diff = torch.zeros([snapshoot, 64, 64],dtype=torch.float).to(device)
+x_diff = torch.zeros([snapshoot, 128, 128],dtype=torch.float).to(device)
 y_test = cc(snapshoot,maxZnkOrder,"random",eeznk,rms,zernike_dir)
 y_test = y_test[:,2:]
 y_test = torch.tensor(y_test).to(device)
@@ -127,9 +127,9 @@ for i in range(snapshoot):
 
     c_test = torch.reshape(y_test[i,:], [1, nzer]).to(device)  
     x_test = nor_progagtion(batch_size,ngrid,ngrid2,init_intens,c_test,Zer,mask0,f_m,h_sum,ez,ddxz)
-    x_test = torch.reshape(x_test, [batch_size, 1, 64, 64]).to(device)  
+    x_test = torch.reshape(x_test, [batch_size, 1, 128, 128]).to(device)  
 
-    y_predict = net(x_test.reshape([batch_size,1,64,64]))
+    y_predict = net(x_test.reshape([batch_size,1,128,128]))
         
     x_predict =  nor_progagtion(batch_size,ngrid,ngrid2,init_intens,y_predict,Zer,mask0,f_m,h_sum,ez,ddxz)
     
@@ -148,8 +148,8 @@ for i in range(snapshoot):
         print("bad predict:rms=",rms_save[i,1])
         plt.figure(1, figsize=(12,4))
         plt.subplot(121)
-        plt.bar(np.array(range(7)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-        plt.bar(np.array(range(7)),y_predict.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
+        plt.bar(np.array(range(33)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
+        plt.bar(np.array(range(33)),y_predict.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
         plt.xlabel("Zernike order",fontsize=15)
         plt.ylabel("Zernike coefficient values",fontsize=15)
         plt.xticks(size = 10)
@@ -158,8 +158,8 @@ for i in range(snapshoot):
         plt.legend()
 
         plt.subplot(122)
-        plt.bar(np.array(range(7)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-        plt.bar(np.array(range(7)),y_predict_choose.detach().cpu().numpy()[i,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
+        plt.bar(np.array(range(33)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
+        plt.bar(np.array(range(33)),y_predict_choose.detach().cpu().numpy()[i,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
         plt.xlabel("Zernike order",fontsize=15)
         plt.ylabel("Zernike coefficient values",fontsize=15)
         plt.xticks(size = 10)
@@ -206,8 +206,8 @@ for i in range(snapshoot):
 
 plt.figure(1, figsize=(12,4))
 plt.subplot(121)
-plt.bar(np.array(range(7)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-plt.bar(np.array(range(7)),y_predict.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
+plt.bar(np.array(range(33)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
+plt.bar(np.array(range(33)),y_predict.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
 plt.xlabel("Zernike order",fontsize=15)
 plt.ylabel("Zernike coefficient values",fontsize=15)
 plt.xticks(size = 10)
@@ -216,8 +216,8 @@ plt.yticks(size=10)
 plt.legend()
 
 plt.subplot(122)
-plt.bar(np.array(range(7)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-plt.bar(np.array(range(7)),y_predict_choose.detach().cpu().numpy()[snapshoot-1,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
+plt.bar(np.array(range(33)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
+plt.bar(np.array(range(33)),y_predict_choose.detach().cpu().numpy()[snapshoot-1,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
 plt.xlabel("Zernike order",fontsize=15)
 plt.ylabel("Zernike coefficient values",fontsize=15)
 plt.xticks(size = 10)

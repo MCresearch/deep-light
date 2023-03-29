@@ -1,19 +1,19 @@
 {
     "data":{
     
-        "mm" : 6,
+        "mm" : 7,
         "mgs" : 0,
         "a0" : 0.3,
         "xx0" : 4,
         "plm" : 1e-6,
         "zfh" : 3e3,
-        "xxz" : 30,
+        "xxz" : 36,
         "minZnkDim" : 1,
         "maxZnkOrder" : 7,
-        "rms" : 4,
+        "rms" : 8,
         "eeznk" : 0.2,
         "dir":"./",
-        "Phase_option" : "confirm",
+        "Phase_option" : "random",
         "zernike_dir": "./zernike35_7_4.txt",
         "nsnapshot":1
     },

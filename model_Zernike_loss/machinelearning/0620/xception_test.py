@@ -45,18 +45,18 @@ dir = injson['test']['dir'] # File saving path
 '''
 rms = 1
 nsnapshot = 1000
-model_dir = "/home/xianyuer/data/35_xception_200000_rms1/35_128_1-100_midloop4_221007_200000_150.h5"
+model_dir = "/home/xianyuer/data/35_xception_200000_rms1/35_256_1-100_midloop4_221007_200000_150.h5"
 intensity_dir = "/home/xianyuer/data/35_xception_200000_rms1/data/5_nor_outintensity.npy"
 zernike_dir ="/home/xianyuer/data/35_xception_200000_rms1/data/5_zernike_35.npy"
 '''
-model = Xception(input_shape = (128, 128,1),
+model = Xception(input_shape = (256, 256,1),
                 pooling = 'avg',
                 backend=keras.backend,
                 layers=keras.layers,
                 models=keras.models,
                 utils=keras.utils,
                 middle_loop=4, #renxi added
-                outdim = 33,
+                outdim = 63,
         )
 model.load_weights(model_dir)
 ############ data and epoch specification #################
@@ -72,7 +72,7 @@ print("nsnapshot = %s" % nsnapshot)
 print("x shape = ", np.shape(x))
 print("y shape = ", np.shape(y))
 
-test_x = x[:nsnapshot,:,:].reshape([nsnapshot, 128, 128, 1])
+test_x = x[:nsnapshot,:,:].reshape([nsnapshot, 256, 256, 1])
 test_y = y[:nsnapshot]    
 print("test_x shape = ", np.shape(test_x))
 print("test_y shape = ", np.shape(test_y))

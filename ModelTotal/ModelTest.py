@@ -7,7 +7,7 @@
 # Version:          1.1
 # Created:          2023/03/22 19:42:56
 # Description:      Main Function: Test the performance of given model
-#                   Cross Reference: Zernike, fun, propagation_speed, Xception_model
+#                   Cross Reference: Zernike, fun, propagation_speed, Xception_model, TestPlot
 # Function List:    None for outer use
 # Input List:
 #         <name>       <type>        <description>
@@ -21,6 +21,7 @@
 #         <author>     <version>     <time>			<description>
 #         Xianyuer     1.0           Unknown        Creat the file
 #         Erjie Wu     1.1           2023/03/22		Optimize the structure & Add some notes
+#         Erjie Wu     1.2           2023/03/27     Add rms-test and SR-test function
 # ----------------------------------------------------------------------------------------------------------
 
 
@@ -55,6 +56,7 @@ from Zernike import *
 from fun import *
 from propagation_speed import *
 from Xception_model import *
+from TestPlot import *
 
 
 #------------ Load & Set Parameters ------------#
@@ -84,6 +86,17 @@ input_model = injson['Test']['ML']['InputModelOption'] # Option for whether use 
 batch_size = injson['Test']['ML']['Batch_Size'] # Batch size for Testing
 seed = injson['Test']['ML']['RandomNumberSeed'] # Random number seed
 snapshoot = injson['Test']['ML']['FrameNumber'] # Frame number for testing
+
+####### Load Parameters for Plot #######
+basic_op = injson['Test']['PL']['Basic'] # Whether show the basic result
+badplot = injson['Test']['PL']['BadPlot'] # Whether show the bad result
+rms_op = injson['Test']['PL']['RMSStatistics'] # Whether show the rms result
+SR_op = injson['Test']['PL']['SRStatistics'] # Whether show the SR result
+histbin = injson['Test']['PL']['BinsOfHist'] # Set the bins of hist
+bias_op = injson['Test']['PL']['Bias'] # Whether show the bias result
+bias_pos = injson['Test']['PL']['BiasForm'] # The zernike order where bias is added
+bias_int = injson['Test']['PL']['BiasIntensity'] # The intensity of bias
+bias_st = injson['Test']['PL']['BiasStatistics'] # Whether show the bias statistics
 
 ####### Load & Set Running Parameters #######
 if os.path.exists(model_name):
@@ -160,24 +173,39 @@ net.load_state_dict(torch.load(model_path))
 net = net.to(device)
 
 # Parameter Initialization
-loss_int= torch.zeros([snapshoot,1],dtype=torch.float).to(device)  
-loss_zer= torch.zeros([snapshoot,nzer],dtype=torch.float).to(device)
+loss_int = torch.zeros([snapshoot,1],dtype=torch.float).to(device)  
+loss_zer = torch.zeros([snapshoot,nzer],dtype=torch.float).to(device)
+Sr = np.zeros([snapshoot,1])
 y_predict_choose = torch.zeros([snapshoot,nzer],dtype=torch.float).to(device)
 rms_save = torch.zeros([snapshoot,2],dtype=torch.float).to(device)
+rms_biasit = torch.zeros(snapshoot,dtype=torch.float).to(device)
+rms_res = torch.zeros(snapshoot,dtype=torch.float).to(device)
 x_diff = torch.zeros([snapshoot, ngrid, ngrid],dtype=torch.float).to(device)
 
 # Generate samples
 y_test = cc(snapshoot,maxZnkOrder,"random",eeznk,rms,zernike_dir)
+# Bias added
+if bias_op == 1:
+    y_test[:,bias_pos-1] = y_test[:,bias_pos-1] + bias_int
+    rms_bias = np.zeros(snapshoot)
+    for bi in range(snapshoot):
+        rms_bias[bi] = np.sum(pow(y_test[bi,:],2))
 y_test = y_test[:,2:]
 y_test = torch.tensor(y_test).to(device)
+
+# Unperturbed situation
+y_zero = cc(snapshoot,maxZnkOrder,"zero",eeznk,rms,zernike_dir)
+y_zero = torch.tensor(y_zero[:,2:]).to(device)
         
 for i in range(snapshoot):
 
-    c_test = torch.reshape(y_test[i,:], [1, nzer]).to(device)  
+    c_test = torch.reshape(y_test[i,:], [1, nzer]).to(device) 
+    c_zero = torch.reshape(y_zero[i,:], [1, nzer]).to(device) 
 
-    # Get the real intensity distribution
+    # Get the real&zero intensity distribution
     x_test = nor_progagtion(batch_size,ngrid,ngrid2,init_intens,c_test,Zer,mask0,f_m,h_sum,ez,ddxz)
     x_test = torch.reshape(x_test, [batch_size, 1, ngrid, ngrid]).to(device)  
+    x_zero = progagtion(batch_size,ngrid,ngrid2,init_intens,c_zero,Zer,mask0,f_m,h_sum,ez,ddxz)
 
     # Get the predict Zernike coefficients and intensity distribution
     y_predict = net(x_test.reshape([batch_size,1,ngrid,ngrid]))
@@ -195,118 +223,124 @@ for i in range(snapshoot):
     loss_int[i]= torch.mean(pow((x_predict - x_test[:,0,:,:]),2))  
     rms_save[i,0] = torch.sum(pow(c_test-y_predict[0,:],2))
     rms_save[i,1] = torch.sum(pow(c_test-y_predict_choose[i,:],2))
+    rms_biasit[i] = pow(y_test[i,bias_pos-3]-y_predict_choose[i,bias_pos-3],2)
+    rms_res[i] = rms_save[i,1]-rms_biasit[i]
 
-    # Calculate the residual far-field intensity distribution
+    # Calculate the residual far-field intensity distribution & SR
     x_diff =  nor_progagtion(batch_size,ngrid,ngrid2,init_intens,c_test-y_predict_choose[i,:],Zer,mask0,f_m,h_sum,ez,ddxz)
-    if rms_save[i,1] > 2:
+    x_diff0 = progagtion(batch_size,ngrid,ngrid2,init_intens,c_test-y_predict_choose[i,:],Zer,mask0,f_m,h_sum,ez,ddxz)
+    Sr[i] = torch.max(torch.max(x_diff0[0,:,:])).detach().cpu().numpy()/torch.max(torch.max(x_zero[0,:,:])).detach().cpu().numpy()
+    
+    # Visualization for bad situations
+    if rms_save[i,1] > 2 and badplot == 1:
         print("bad predict:rms=",rms_save[i,1])
+
+        # Plot the Zernike coefficient comparison
         plt.figure(1, figsize=(12,4))
         plt.subplot(121)
-        plt.bar(np.array(range(nzer)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-        plt.bar(np.array(range(nzer)),y_predict.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
-        plt.xlabel("Zernike order",fontsize=15)
-        plt.ylabel("Zernike coefficient values",fontsize=15)
-        plt.xticks(size = 10)
-        plt.yticks(size=10)
-        # plt.title("Test set No.%d, model = 35_64_50_intloss" % 2,fontsize=15)
-        plt.legend()
-
+        ZerCom(np.array(range(nzer)),c_test[0,:],y_predict[0,:])
         plt.subplot(122)
-        plt.bar(np.array(range(nzer)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-        plt.bar(np.array(range(nzer)),y_predict_choose.detach().cpu().numpy()[i,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
-        plt.xlabel("Zernike order",fontsize=15)
-        plt.ylabel("Zernike coefficient values",fontsize=15)
-        plt.xticks(size = 10)
-        plt.yticks(size=10)
-        # plt.title("Test set No.%d, model = 35_64_50_intloss" % 2,fontsize=15)
-        plt.legend()
-        plt.savefig(dir+str(i+1)+"_zer.png",bbox_inches='tight') #,bbox_inches='tight'
+        ZerCom(np.array(range(nzer)),c_test[0,:],y_predict_choose[i,:])
+        plt.savefig(dir+str(i+1)+"_zer.png",bbox_inches='tight') 
         plt.close()
 
-        plt.figure(1, figsize=(16,4))
-        plt.subplot(131)
-        plt.contourf(x_test.detach().cpu().numpy()[0,0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
-        plt.colorbar()
-        # plt.xticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-        # plt.yticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-        plt.xlabel("x (m)",fontsize=15)
-        plt.ylabel("y (m)",fontsize=15)
+        # Plot the intensity distribution camparison
+        IntCom(x_test[0,0,:,:],x_predict[0,:,:],x_diff[0,:,:],name=dir+str(i+1)+"_int.png")
+        
+# Basic result: Zernike coefficient and intensity distribution output
+if basic_op == 1:
+    # Plot the Zernike coefficient comparison
+    plt.figure(1, figsize=(12,4))
+    plt.subplot(121)
+    ZerCom(np.array(range(nzer)),c_test[0,:],y_predict[0,:])
+    plt.subplot(122)
+    ZerCom(np.array(range(nzer)),c_test[0,:],y_predict_choose[snapshoot-1,:])
+    plt.savefig(dir+"rms=%d_zer.png"%(rms),bbox_inches='tight') 
+    plt.close()
 
-        plt.subplot(132)
-        plt.contourf(x_predict.detach().cpu().numpy()[0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
-        plt.colorbar()
-        # plt.xticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-        # plt.yticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-        plt.xlabel("x (m)",fontsize=15)
-        plt.ylabel("y (m)",fontsize=15)
+    # Plot the intensity distribution camparison
+    IntCom(x_test[0,0,:,:],x_predict[0,:,:],x_diff[0,:,:],name=dir+"rms=%d_int.png"%(rms))
 
+# RMS analysis
+if rms_op == 1:
+    # Output the prediction rms
+    fid = open(dir+'rms_rms=%d.log'%(rms), 'w')
+    rms_mean = torch.mean(rms_save[:,1])
+    fid.write(str(rms_mean.item())+'\n')
+    for i in range(snapshoot):
+        fid.write(str(rms_save[i,0].item())+'\t'+str(rms_save[i,1].item())+'\n')
+    fid.close()
 
-        plt.subplot(133)
-        plt.contourf(x_diff.detach().cpu().numpy()[0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
-        plt.colorbar()
-        # plt.xticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-        # plt.yticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-        plt.xlabel("x (m)",fontsize=15)
-        plt.ylabel("y (m)",fontsize=15)
+    # Plot the RMS statistical result
+    plt.figure(1, figsize=(6,4))
+    plt.hist(rms_save[:,1].detach().cpu().numpy(), bins=histbin)
+    plt.xlabel("rms")
+    plt.ylabel("number")
+    plt.title("Prediction RMS distribution for Phase Varience %d"%(rms))
+    plt.grid(True)
+    plt.savefig(dir+"rms=%d.png"%(rms),bbox_inches='tight')
+    plt.close()
 
-        plt.savefig(dir+str(i+1)+"_int.png",bbox_inches='tight')
-        plt.close()
+# Plot the SR statistical result
+if SR_op == 1:
+    plt.figure(1, figsize=(6,4))
+    plt.hist(Sr, bins=histbin)
+    plt.xlabel("SR")
+    plt.ylabel("number")
+    plt.title("Prediction SR for Phase Varience %d"%(rms))
+    plt.grid(True)
+    plt.savefig(dir+"rms=%d_SR.png"%(rms),bbox_inches='tight')
+    plt.close()
 
-fid = open(dir+'rms.log', 'w')
-rms_mean = torch.mean(rms_save[i,1])
-fid.write(str(rms_mean.item())+'\n')
-for i in range(snapshoot):
-    fid.write(str(rms_save[i,0].item())+'\t'+str(rms_save[i,1].item())+'\n')
+# Plot the analysis of bias
+if bias_op == 1:
+    plt.figure(1, figsize=(12,4))
+    plt.subplot(121)
+    plt.scatter(rms_bias, rms_save[:,1].detach().cpu().numpy())
+    plt.xlabel("Phase varience")
+    plt.ylabel("RMS")
+    plt.title("RMS analysis of intensity %.2f for Phase varience=%d"%(bias_int,rms))
 
-plt.figure(1, figsize=(12,4))
-plt.subplot(121)
-plt.bar(np.array(range(nzer)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-plt.bar(np.array(range(nzer)),y_predict.detach().cpu().numpy()[0,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
-plt.xlabel("Zernike order",fontsize=15)
-plt.ylabel("Zernike coefficient values",fontsize=15)
-plt.xticks(size = 10)
-plt.yticks(size=10)
-# plt.title("Test set No.%d, model = 35_64_50_intloss" % 2,fontsize=15)
-plt.legend()
+    plt.subplot(122)
+    plt.scatter(rms_bias, Sr)
+    plt.xlabel("Phase varience")
+    plt.ylabel("SR")
+    plt.title("SR analysis of intensity %.2f for Phase varience=%d"%(bias_int,rms))
 
-plt.subplot(122)
-plt.bar(np.array(range(nzer)),c_test.detach().cpu().numpy()[0,:], color="red",alpha=1,label = "Initial values")
-plt.bar(np.array(range(nzer)),y_predict_choose.detach().cpu().numpy()[snapshoot-1,:], color="blue",alpha=0.5,label = "Predict(by Xception)")
-plt.xlabel("Zernike order",fontsize=15)
-plt.ylabel("Zernike coefficient values",fontsize=15)
-plt.xticks(size = 10)
-plt.yticks(size=10)
-# plt.title("Test set No.%d, model = 35_64_50_intloss" % 2,fontsize=15)
-plt.legend()
-plt.savefig(dir+"_zer.png",bbox_inches='tight') #,bbox_inches='tight'
-plt.close()
+    plt.savefig(dir+"rms=%d_bias=%.2f.png"%(rms,bias_int),bbox_inches='tight')
+    plt.close()
 
-plt.figure(1, figsize=(16,4))
-plt.subplot(131)
-plt.contourf(x_test.detach().cpu().numpy()[0,0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
-plt.colorbar()
-# plt.xticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-# plt.yticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-plt.xlabel("x (m)",fontsize=15)
-plt.ylabel("y (m)",fontsize=15)
+    fid = open(dir+'bias_rms=%d.log'%(rms), 'a')
+    fid.write(str(bias_int)+'\t'+str(torch.sqrt(torch.mean(rms_save[:,1])).item())+'\t'+str(torch.sqrt(torch.mean(rms_biasit)).item())+'\t'+str(torch.sqrt(torch.mean(rms_res)).item())+'\t'+str(np.mean(Sr).item())+'\n')
+    fid.close()
 
-plt.subplot(132)
-plt.contourf(x_predict.detach().cpu().numpy()[0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
-plt.colorbar()
-# plt.xticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-# plt.yticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-plt.xlabel("x (m)",fontsize=15)
-plt.ylabel("y (m)",fontsize=15)
+# Plot the analysis for different bias intensities
+if bias_st == 1:
+    with open(dir+'bias_rms=%d.log'%(rms), 'r') as f:
+        data_bias = np.zeros([len(f.readlines()),5])
+        ib = 0
+        f.seek(0,0)
+        for line in f:
+            data_bias[ib,:] = np.array(str.split(line))
+            ib = ib + 1
+    plt.figure(1, figsize=(12,4))
+    plt.subplot(121)
+    plt.scatter(data_bias[:,0],data_bias[:,1],c='g',label='Error of all orders')
+    plt.scatter(data_bias[:,0],data_bias[:,2],c='r',label='Error of order %d'%(bias_pos))
+    plt.scatter(data_bias[:,0],data_bias[:,3],c='b',label='Error of other order')
+    plt.ylim(0,0.5)
+    plt.xlabel("Focus Error")
+    plt.ylabel("RMS")
+    plt.legend()
+    plt.title("RMS under different bias conditions for Phase varience=%d"%(rms))
 
+    plt.subplot(122)
+    plt.scatter(data_bias[:,0],data_bias[:,4],label='SR')
+    plt.ylim(0,1)
+    plt.xlabel("Focus Error")
+    plt.ylabel("SR")
+    plt.legend()
+    plt.title("SR under different bias conditions for Phase varience=%d"%(rms))
 
-
-plt.subplot(133)
-plt.contourf(x_diff.detach().cpu().numpy()[0,:,:],levels=[0.01*i for i in range(102)], cmap=plt.get_cmap('jet'))
-plt.colorbar()
-# plt.xticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-# plt.yticks([i*n_grid/4 for i in range(5)], ["%.4f" %(i*aaz/4) for i in range(-2,3)],size=10)
-plt.xlabel("x (m)",fontsize=15)
-plt.ylabel("y (m)",fontsize=15)
-
-plt.savefig(dir+"_int.png",bbox_inches='tight')
-plt.close()
+    plt.savefig(dir+"biasFORrms=%d.png"%(rms),bbox_inches='tight')
+    plt.close()

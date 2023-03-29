@@ -4,14 +4,14 @@
         "Dir": "./",
         "ML":{
             "__Comment__": "These are parameters used in Machine Learning",
-            "Epoch": 200,
-            "Batch_Size": 2,
+            "Epoch": 500,
+            "Batch_Size": 16,
             "RandomNumberSeed": 12333345,
-            "InputModelOption": 0,
-            "InputModelDir": "./model/0322_35_128_400_32_4_7.pt",
-            "InitialLearningRate": 0.001,
+            "InputModelOption": 1,
+            "InputModelDir": "./model/0313_35_128_200000_16_4_3to8.pt",
+            "InitialLearningRate": 0.0000001,
             "LearningRateDecay": 0.1,
-            "LearningRateDecay_Step": 100,
+            "LearningRateDecay_Step": 500,
             "GaussTruncationIndex": 0,
             "LossForm": "Zernike"
         },
@@ -42,9 +42,9 @@
             "Batch_Size": 1,
             "RandomNumberSeed": 12333345,
             "InputModelOption": 0,
-            "ModelName": "0322_35_128_400_32_4_7",
-            "InputModelDir": "./model/0322_35_128_400_32_4_7.pt",
-            "FrameNumber": 100
+            "ModelName": "0313_35_128_30000_16_4_5to8",
+            "InputModelDir": "./model/0313_35_128_30000_16_4_5to8.pt",
+            "FrameNumber": 200
         },
 
         "PM":{
@@ -62,30 +62,19 @@
             "ZnkDecay" : 0.2,
             "dir": "./"
         },
-        
-        "analyse":{
-            "nzernike" : 35,
-            "option_zernike_corfficient" : 1,
-            "option_rms" : 1,
-            "option_intensity" : 1,
-            "option_SR" : 0,
-            "framnum": 10, 
-            "nsnapshots" : 1000,
-            "distribution" : "guass",
-            "n_grid" : 256,
-            "m_grid" : 128,
-            "rms" : 1,
-            "airyr" : "0.0061",
-            "xxz": 20,
-            "aa0" : 1.2,
-            "interval" : 5,
-            "dir" : "./",
-            "real_zernike_dir" : "zernike_test_real.txt",
-            "predict_zernike_dir" : "zernike_test_predict.txt",
-            "diff_zernike_dir" : "zernike_test_diff.txt",
-            "real_out_all_0_dir" : "/home/xianyuer/data/35_xception_200000_rms1/data/5_dl_down_intensity.dat",
-            "diff_out_all_dir" : "/home/xianyuer/data/35_xception_200000_rms1/test/outintensity.npy",
-            "ideal_out_dir" : "/home/xianyuer/data/35_xception_200000_rms1/test/ideal_dl_down_intensity.dat"
+
+        "PL":{
+            "__Comment__":"These are parameters used for plot",
+            "Basic": 0,
+            "BadPlot": 0,
+            "RMSStatistics": 0,
+            "SRStatistics": 0,
+            "BinsOfHist": 20,
+            "Bias": 0,
+            "BiasForm": 3,
+            "BiasIntensity": 0.5,
+            "BiasStatistics": 1
         }
+        
     }
 }

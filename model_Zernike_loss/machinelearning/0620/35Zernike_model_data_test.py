@@ -1,7 +1,7 @@
 ######### parameters setting ########
 '''
 data_size = [200000, 10000, 30000, 100000]
-model_name = "35_128_1-100_midloop4"
+model_name = "35_256_1-100_midloop4"
 epoch = [150, 150, 150, 150]
 batch_size=16
 #batch_size=8
@@ -9,7 +9,7 @@ seed = 12333345
 data_time = "221007"
 input_model = False
 dir = "/data/home/scv1925/run/3_zhangxianyue/deep-light/35_rms1_200000/"
-#input_model = "./35_128_200000_50-100_midloop4_220718_200000_50.h5"
+#input_model = "./35_256_200000_50-100_midloop4_220718_200000_50.h5"
 #model_path = "0921_2_20210322_10_0.1_17000_300.h5"
     
 intensity_dir = dir+"data/1_nor_outintensity.npy"
@@ -34,8 +34,8 @@ zernike_dir = injson['train']['zernike_dir'] # Zernike coefficients path
 
 ######### import session #############
 import os
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
-os.environ['KERAS_BACKEND'] = 'tensorflow'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0" # Set which GPU in the server are used by the program
+os.environ['KERAS_BACKEND'] = 'tensorflow' # Set the backend of keras(tensorflow or theano)
 #import keras.backend as K
 #K.set_image_dim_ordering('tf')
 import sys
@@ -76,15 +76,15 @@ y = y[:,2:]
 print("x shape = ", np.shape(x))
 print("y shape = ", np.shape(y))
 
-for i in range(1):
+for i in range(1,2):
     nsnapshot = data_size[i]
     nepoch = epoch[i]
     print("nsnapshot = %s" % nsnapshot)
  
-    train_x = x[:nsnapshot].reshape([nsnapshot,128, 128, 1])
+    train_x = x[:nsnapshot].reshape([nsnapshot,256,256, 1])
     train_y = y[:nsnapshot]
 
-    test_x = x[-1000:].reshape([1000, 128, 128, 1])
+    test_x = x[-1000:].reshape([1000, 256, 256, 1])
     test_y = y[-1000:]
     print("test_x shape = ", np.shape(test_x))
     print("test_y shape = ", np.shape(test_y))
@@ -92,24 +92,24 @@ for i in range(1):
     ############ model specification ##############
     try:
         if(input_model == "False"):
-            model = Xception(input_shape = (128, 128, 1),
+            model = Xception(input_shape = (256, 256, 1),
                  pooling = 'avg',
                  backend=keras.backend,
                  layers=keras.layers,
                  models=keras.models,
                  utils=keras.utils,
                  middle_loop=4, #renxi added
-                 outdim = 33,
+                 outdim = 63,
         )
         else:
-            model = Xception(input_shape = (128, 128, 1),
+            model = Xception(input_shape = (256, 256, 1),
                  pooling = 'avg',
                  backend=keras.backend,
                  layers=keras.layers,
                  models=keras.models,
                  utils=keras.utils,
                  middle_loop=4, #renxi added
-                 outdim = 33,)
+                 outdim = 63,)
             model.load_weights(input_model)
             print("Model loaded from " + input_model)
         model.compile(loss=losses.mean_squared_error,
@@ -144,7 +144,7 @@ for i in range(1):
 
     ############ End model fitting #################
 
-    model.save_weights(model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+".h5")
-    with open(model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+"_history.json", 'w') as f:
+    model.save_weights("../../data/"+model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+".h5")
+    with open("../../data/"+model_name+"_"+data_time+"_"+str(nsnapshot)+"_"+str(nepoch)+"_history.json", 'w') as f:
         json.dump(history.history, f, cls = NpEncoder)
 
