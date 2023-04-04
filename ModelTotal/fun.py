@@ -26,8 +26,8 @@
 
 #------------ Load Package ------------#
 
-import numba
-from numba import jit
+#import numba
+#from numba import jit
 import numpy as np
 import torch
 
@@ -44,6 +44,8 @@ def prop1(n_grid,n1,dz,kp,aa,h):
         j1 = j + 1 - n1
         t0 = tt * j1 * j1
         h[j] = -t0
+    return
+
 
 # Propagation: Multiply the amplitude and phase
 def evol1(n_grid, h, img0_):
@@ -51,6 +53,8 @@ def evol1(n_grid, h, img0_):
         for j in range(n_grid):
             img0_[i,j] = img0_[i,j]*torch.exp(1j*h[i])
             img0_[i,j] = img0_[i,j]*torch.exp(1j*h[j])
+    return
+
 
 # FFT for 2D signal
 def fftt(img0):
