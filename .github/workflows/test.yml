@@ -23,7 +23,6 @@ jobs:
         echo $CONDA/bin >> $GITHUB_PATH
     - name: Install dependencies
       run: |
-        conda env update --file environment.yml --name base
         python  -m pip install .[torch, numpy] coverage
     - name: Test 
       run: |
