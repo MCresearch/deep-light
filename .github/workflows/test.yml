@@ -27,3 +27,5 @@ jobs:
     - name: Test 
       run: |
         cd tests && coverage run --source=../ModelTotal -m unittest && cd .. && coverage combine tests/.coverage && coverage report
+    - name: Run codecov
+      uses: codecov/codecov-action@v3
