@@ -80,7 +80,7 @@ def Zer1(maxZnkOrder,mm,a0,xx0):
             r2 = gx[i,j]*gx[i,j]+gy[i,j]*gy[i,j]
             if r2/a02 <= 1:
                 Zer[i,j,:] = Zernike(maxZnkDim,gx[i,j]/a0,gy[i,j]/a0) # Zernike mode
-    return Zer
+    return Zer,maxZnkDim
 
 def cc(nsnapshot,maxZnkOrder,Phase_option,eeznk,rms,zernike_dir):
     maxZnkDim = maxZernike(maxZnkOrder)
@@ -103,13 +103,13 @@ def cc(nsnapshot,maxZnkOrder,Phase_option,eeznk,rms,zernike_dir):
     return cz_
 
 
-def progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,ddxz):
+def progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,maxZnkDim ,mask0,f_m,h_sum,ez,ddxz):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
     far_field_intens_orig = torch.zeros((nsnapshot,ngrid, ngrid)).to(device)
     down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     for iss in range(nsnapshot):
         phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
-        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,7]),2)
+        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,maxZnkDim-2]),2)
         obj0_ = mask0*init_intens*torch.exp(1j*phi0) # initial field
         ################## focusing ###################
         # img0_ = obj0_*torch.exp(1j*ei) #focusing
@@ -145,13 +145,13 @@ def progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,ddxz
         far_field_intens_orig[iss,:,:] = int_out
     return far_field_intens_orig
 
-def nor_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,ddxz):
+def sumnor_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,maxZnkDim ,mask0,f_m,h_sum,ez,ddxz):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
     far_field_intens_orig = torch.zeros((nsnapshot,ngrid, ngrid)).to(device)
     down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     for iss in range(nsnapshot):
         phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
-        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,7]),2)
+        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,maxZnkDim-2]),2)
         obj0_ = mask0*init_intens*torch.exp(1j*phi0) # initial field
         ################## focusing ###################
         # img0_ = obj0_*torch.exp(1j*ei) #focusing
@@ -184,16 +184,17 @@ def nor_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,
         img0_ = img0_*torch.exp(1j*ez) #mdfph
         img0_ = img0_/ddxz
         int_out = torch.abs(img0_)**2
-        far_field_intens_orig[iss,:,:] = int_out/torch.max(int_out)
+        sum_1 = torch.sum(int_out)
+        far_field_intens_orig[iss,:,:] = int_out/sum_1
     return far_field_intens_orig
 
-def nor_down_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_sum,ez,ddxz):
+def nor_down_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,maxZnkDim ,mask0,f_m,h_sum,ez,ddxz):
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
     far_field_intens_orig = torch.zeros((nsnapshot,ngrid, ngrid)).to(device)
     down_intens = torch.zeros((nsnapshot,ngrid2, ngrid2)).to(device)
     for iss in range(nsnapshot):
         phi0 = torch.zeros((ngrid, ngrid),dtype=torch.float).to(device)
-        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,7]),2)
+        phi0 = torch.sum(Zer[:,:,3:]*torch.reshape(cz[iss,:],[1,1,maxZnkDim-2]),2)
         obj0_ = mask0*init_intens*torch.exp(1j*phi0) # initial field
         ################## focusing ###################
         # img0_ = obj0_*torch.exp(1j*ei) #focusing
@@ -228,15 +229,15 @@ def nor_down_progagtion(nsnapshot,ngrid,ngrid2,init_intens,cz,Zer,mask0,f_m,h_su
         int_out = torch.abs(img0_)**2
         far_field_intens_orig[iss,:,:] = int_out
         max = 0
-        # for i in range(0,ngrid,2):
-        #     for j in range(0,ngrid,2):
-        #         max = int_out[i,j]
-        #         if max < int_out[i,j+1]:
-        #             max = int_out[i,j + 1]
-        #         if max < int_out[i+1,j]:
-        #             max = int_out[i+1,j]
-        #         if max < int_out[i+1,j+1]:
-        #             max = int_out[i+1,j + 1]     
-        #         down_intens[iss,i//2,j//2] = max
+        for i in range(0,ngrid,2):
+            for j in range(0,ngrid,2):
+                max = int_out[i,j]
+                if max < int_out[i,j+1]:
+                    max = int_out[i,j + 1]
+                if max < int_out[i+1,j]:
+                    max = int_out[i+1,j]
+                if max < int_out[i+1,j+1]:
+                    max = int_out[i+1,j + 1]     
+                down_intens[iss,i//2,j//2] = max
         down_intens[iss,:,:] = down_intens[iss,:,:]/torch.max(down_intens[iss,:,:])
     return down_intens
