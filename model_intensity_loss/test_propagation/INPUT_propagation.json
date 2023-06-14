@@ -1,0 +1,18 @@
+{
+    "data":{
+    
+        "mm" : 3,
+        "mgs" : 0,
+        "a0" : 0.3,
+        "xx0" : 4,
+        "plm" : 1e-6,
+        "zfh" : 3e3, 
+        "xxz" : 20,
+        "minZnkDim" : 1,
+        "maxZnkOrder" : 7,
+        "rms" : 1,
+        "eeznk" : 0.2,
+        "zernike_dir": "/home/xianyuer/data/intensityloss_git/test_propagation/zernike35_7_4.txt",
+        "nsnapshot":2
+    }
+}
