@@ -1,0 +1,18 @@
+{
+    "model":{
+    
+        "name" : "0627test_",
+        "model_path" : "False",
+        "epoch" : 2,
+        "batch_size" : 16,
+        "lr" : 0.0001,
+        "print_step":2000,
+        "save_step":1,
+        "seed" : 12333345,
+        "dir" : "./",
+        "loss_type" : "intensityloss",
+        "save" : "False",
+        "data_train":"confirm",
+        "nsnapshot":50000
+    }
+}

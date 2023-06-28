@@ -2,7 +2,7 @@
 import numpy as np
 import sys
 # import sklearn
-# from sklearn.model_selection import train_test_split
+from sklearn.model_selection import train_test_split
 # from sklearn.feature_selection import SelectKBest, chi2
 # from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder,MinMaxScaler, StandardScaler
 import torch
@@ -25,7 +25,7 @@ from model_fit import *
 #https://blog.csdn.net/BernardDong/article/details/125495796
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
 # Parameters setting 
-with open("INPUT_model.json", 'r', encoding='utf-8') as fw:
+with open("INPUT_model_test.json", 'r', encoding='utf-8') as fw:
     injson_model = json.load(fw)
 
 model_name = injson_model['model']['name']
@@ -37,8 +37,12 @@ seed = injson_model['model']['seed']
 dir = injson_model['model']['dir']
 loss_type = injson_model['model']['loss_type']
 save = injson_model['model']['save']
+data_train = injson_model['model']['data_train']
+nsnapshot = injson_model['model']['nsnapshot']
+print_step = injson_model['model']['print_step']
+save_step = injson_model['model']['save_step']
 
-with open("INPUT_propagation.json", 'r', encoding='utf-8') as fw:
+with open("INPUT_propagation_test.json", 'r', encoding='utf-8') as fw:
     injson = json.load(fw)
 mm = injson['data']['mm'] 
 mgs = injson['data']['mgs']
@@ -53,67 +57,6 @@ rms = injson['data']['rms']
 eeznk = injson['data']['eeznk']
 zernike_dir = injson['data']['zernike_dir']
 
-# Transmission parameter calculation
-Zer,maxZnkDim = Zer1(maxZnkOrder,mm,a0,xx0)
-print(maxZnkDim)
-
-Zernike_alias_all = np.array([1] * 2 + [-1] * 3 + [1] * 4 + [-1] * 5 + [1] * 6 + [-1] * 7 + [1] * 8+ [-1] * 9+ [1] * 10 + [-1] * 11+ [1] * 12+ [-1] * 13 + [1] * 14, dtype=np.float32)
-Zernike_alias =  Zernike_alias_all[2:maxZnkDim]
-Zernike_alias  = torch.tensor(Zernike_alias).to(device)
-Zer,maxZnkDim = Zer1(maxZnkOrder,mm,a0,xx0)
-print("shape zer",np.shape(Zer))
-Zer = torch.tensor(Zer).to(device)
-
-init_intens = init_intensity(mm,a0,xx0,mgs)
-init_intens = torch.tensor(init_intens).to(device)
-
-nxzz = a0*xx0
-ngrid = pow(2,mm)
-n1 = ngrid/2 + 1
-aa0 = xx0*a0
-dxy0 = aa0/ngrid
-airy = 1.22*plm*zfh/(2*a0)
-aaz = airy*xxz
-dxyz = aaz/ngrid
-ngrid2 = ngrid//2
-a02 = a0*a0
-gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))
-gy2,gx2 = np.meshgrid(dxyz*np.linspace(1-n1,ngrid-n1,ngrid),dxyz*np.linspace(1-n1,ngrid-n1,ngrid))
-
-dlta = (1-aaz/aa0)/zfh
-ddxz = 1-dlta*zfh
-dk0 = 1/aa0
-zzzz = zfh/(1-dlta*zfh)
-wave_number = 2*torch.pi/plm
-ei = -wave_number*(gx*gx+gy*gy)/2*(1/zfh)
-ei = torch.tensor(ei).to(device)
-ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2
-ec = torch.tensor(ec).to(device)
-h = torch.zeros(ngrid).to(device)
-h_sum = torch.zeros((ngrid,ngrid)).to(device)
-prop1(ngrid,n1,zzzz,wave_number,aa0,h)
-for i in range(ngrid):
-    for j in range(ngrid):
-        h_sum[i,j] = h[i]+h[j]
-        
-ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy2*gy2*dlta/(2*ddxz)
-ez = torch.tensor(ez).to(device)
-mask0 = ((gx**2 + gy**2)/a02 <= 1)
-mask0 = torch.tensor(mask0).to(device)
-f_m = torch.exp(1j*ei)*torch.exp(1j*ec)
-
-# gauss
-r02 = a0*a0*xx0*xx0/36
-gauss = np.ones((ngrid,ngrid))
-mask00 = ((gx*gx + gy*gy)<=r02)
-gauss  = gauss * mask00
-gauss  = torch.tensor(gauss).to(device)
-gauss = torch.reshape(gauss, [1, ngrid, ngrid]).to(device)  
-print(gauss)
-
-# Set the random number seed
-torch.manual_seed(51)
-
 # Load model
 net = Xception()
 if model_path == "False":
@@ -121,5 +64,83 @@ if model_path == "False":
 else:
     net.load_state_dict(torch.load(model_path))
     net = net.to(device)
-# Model fit
-fit(model_name,net,loss_type,save,batch_size,epoch,lr,zernike_dir,Zernike_alias,maxZnkOrder,eeznk,rms,ngrid,ngrid2,init_intens,Zer,maxZnkDim,mask0,f_m,h_sum,ez,ddxz,gauss)
+    
+# Transmission parameter calculation
+Zernike_alias,maxZnkOrder,eeznk,rms,ngrid,ngrid2,init_intens,Zer,maxZnkDim,mask0,f_m,h_sum,ez,ddxz,gauss = parameter(mm,mgs,a0,xx0,plm,zfh,xxz,maxZnkOrder,minZnkDim,rms,eeznk,zernike_dir)
+# Set the random number seed
+torch.manual_seed(51)
+
+if data_train == "random": 
+    # Model fit
+    fit(model_name,net,loss_type,save,batch_size,epoch,lr,print_step,save_step,zernike_dir,Zernike_alias,maxZnkOrder,eeznk,rms,ngrid,ngrid2,init_intens,Zer,maxZnkDim,mask0,f_m,h_sum,ez,ddxz,gauss)
+
+if data_train == "confirm":
+    dir1 = "/home/xianyuer/data/intensityloss_git/"
+    intensity_dir1 = dir1+"1_50000y3_sumnor_outintensity.npy"
+    zernike_dir1 = dir1+"1_50000y3_zernike.npy"
+
+    # intensity_dir2 =dir1+"2_50000y3_sumnor_outintensity.npyy"
+    # zernike_dir2 =dir1+"2_50000y3_zernike.npy"
+
+    # intensity_dir3 =dir1+"3_50000y3_sumnor_outintensity.npy"
+    # zernike_dir3 =dir1+"3_50000y3_zernike.npy"
+
+    # intensity_dir4 =dir1+"4_50000y3_sumnor_outintensity.npy"
+    # zernike_dir4 =dir1+"4_50000y3_zernike.npy"
+
+    # intensity_dir5 =dir1+"5_2000nor_outIntensity_65_0-1_4_2000.npy"
+    # zernike_dir5 =dir1+"5_50000y3_zernike.npy"
+    x1 = np.load(intensity_dir1)
+    y1 = np.load(zernike_dir1)
+    # x2 = np.load(intensity_dir2)
+    # y2 = np.load(zernike_dir2)
+    # x3 = np.load(intensity_dir3)
+    # y3 = np.load(zernike_dir3)
+    # x4 = np.load(intensity_dir4)
+    # y4 = np.load(zernike_dir4)
+    # x5 = np.load(intensity_dir5)
+    # y5 = np.load(zernike_dir5)
+    # y = np.concatenate((y1,y2))
+    # y = np.concatenate((y,y3))
+    # y = np.concatenate((y,y4))
+
+    # x = np.concatenate((x1,x2))
+    # x = np.concatenate((x,x3))
+    # x = np.concatenate((x,x4))
+    x = x1
+    y = y1
+    print("x shape = ", np.shape(x))
+    print("y shape = ", np.shape(y))
+    print("nsnapshot = %s" % nsnapshot)
+    train_x = x[:nsnapshot].reshape([nsnapshot, 1, ngrid, ngrid])
+    train_y = y[:nsnapshot]
+    x_train = train_x 
+    y_train = train_y 
+    # x_train,x_test,y_train,y_test=train_test_split(train_x,train_y,test_size=0.2)
+    print("x_train shape = ", np.shape(x_train))
+    print("y_train shape = ", np.shape(y_train))
+    # print("x_test shape = ", np.shape(x_test))
+    # print("y_test shape = ", np.shape(y_test))
+    x_train = torch.tensor(x_train).to(device)
+    y_train = torch.tensor(y_train).to(device)
+    # x_test = torch.tensor(x_test).to(device)
+    # y_test = torch.tensor(y_test).to(device)
+    
+    # 构建Dataset数据集
+    class MyDataset(Dataset):#需要继承torch.utils.data.Dataset
+        def __init__(self,feature,target):
+            super(MyDataset, self).__init__()
+            self.feature =feature
+            self.target = target
+        def __getitem__(self,index):
+            item=self.feature[index]
+            label=self.target[index]
+            return item,label
+        def __len__(self):
+            return len(self.feature)
+    # 封装成DataLoader对象
+    bs = batch_size 
+    train_data=MyDataset(x_train,y_train)
+    train_data=DataLoader(train_data, batch_size=bs, shuffle=True)
+    
+    fit2(train_data,model_name,net,loss_type,save,batch_size,epoch,lr,print_step,save_step,zernike_dir,Zernike_alias,maxZnkOrder,eeznk,rms,ngrid,ngrid2,init_intens,Zer,maxZnkDim,mask0,f_m,h_sum,ez,ddxz,gauss)

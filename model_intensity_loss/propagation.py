@@ -9,6 +9,71 @@ import json
 from numba import jit
 import torch
 import torch.nn as nn
+
+
+def parameter(mm,mgs,a0,xx0,plm,zfh,xxz,maxZnkOrder,minZnkDim,rms,eeznk,zernike_dir):
+    
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu") 
+    # Transmission parameter calculation
+    Zer,maxZnkDim = Zer1(maxZnkOrder,mm,a0,xx0)
+    print(maxZnkDim)
+
+    Zernike_alias_all = np.array([1] * 2 + [-1] * 3 + [1] * 4 + [-1] * 5 + [1] * 6 + [-1] * 7 + [1] * 8+ [-1] * 9+ [1] * 10 + [-1] * 11+ [1] * 12+ [-1] * 13 + [1] * 14, dtype=np.float32)
+    Zernike_alias =  Zernike_alias_all[2:maxZnkDim]
+    Zernike_alias  = torch.tensor(Zernike_alias).to(device)
+    Zer,maxZnkDim = Zer1(maxZnkOrder,mm,a0,xx0)
+    print("shape zer",np.shape(Zer))
+    Zer = torch.tensor(Zer).to(device)
+
+    init_intens = init_intensity(mm,a0,xx0,mgs)
+    init_intens = torch.tensor(init_intens).to(device)
+
+    nxzz = a0*xx0
+    ngrid = pow(2,mm)
+    n1 = ngrid/2 + 1
+    aa0 = xx0*a0
+    dxy0 = aa0/ngrid
+    airy = 1.22*plm*zfh/(2*a0)
+    aaz = airy*xxz
+    dxyz = aaz/ngrid
+    ngrid2 = ngrid//2
+    a02 = a0*a0
+    gy,gx = np.meshgrid(dxy0*np.linspace(1-n1,ngrid-n1,ngrid),dxy0*np.linspace(1-n1,ngrid-n1,ngrid))
+    gy2,gx2 = np.meshgrid(dxyz*np.linspace(1-n1,ngrid-n1,ngrid),dxyz*np.linspace(1-n1,ngrid-n1,ngrid))
+
+    dlta = (1-aaz/aa0)/zfh
+    ddxz = 1-dlta*zfh
+    dk0 = 1/aa0
+    zzzz = zfh/(1-dlta*zfh)
+    wave_number = 2*torch.pi/plm
+    ei = -wave_number*(gx*gx+gy*gy)/2*(1/zfh)
+    ei = torch.tensor(ei).to(device)
+    ec = wave_number*gx*gx*dlta/2 + wave_number*gy*gy*dlta/2
+    ec = torch.tensor(ec).to(device)
+    h = torch.zeros(ngrid).to(device)
+    h_sum = torch.zeros((ngrid,ngrid)).to(device)
+    prop1(ngrid,n1,zzzz,wave_number,aa0,h)
+    for i in range(ngrid):
+        for j in range(ngrid):
+            h_sum[i,j] = h[i]+h[j]
+            
+    ez = -1*wave_number*gx2*gx2*dlta/(2*ddxz) - wave_number*gy2*gy2*dlta/(2*ddxz)
+    ez = torch.tensor(ez).to(device)
+    mask0 = ((gx**2 + gy**2)/a02 <= 1)
+    mask0 = torch.tensor(mask0).to(device)
+    f_m = torch.exp(1j*ei)*torch.exp(1j*ec)
+
+    # gauss
+    r02 = a0*a0*xx0*xx0/36
+    gauss = np.ones((ngrid,ngrid))
+    mask00 = ((gx*gx + gy*gy)<=r02)
+    gauss  = gauss * mask00
+    gauss  = torch.tensor(gauss).to(device)
+    gauss = torch.reshape(gauss, [1, ngrid, ngrid]).to(device)  
+    
+    return Zernike_alias,maxZnkOrder,eeznk,rms,ngrid,ngrid2,init_intens,Zer,maxZnkDim,mask0,f_m,h_sum,ez,ddxz,gauss
+
+
 def init_intensity(mm,a0,xx0,mgs):
 
     ngrid = pow(2,mm)
