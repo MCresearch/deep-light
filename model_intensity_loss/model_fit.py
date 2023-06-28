@@ -21,8 +21,6 @@ import json
 from propagation import *
 import random
 from Xception import *
-with open("INPUT_model.json", 'r', encoding='utf-8') as fw:
-    injson_model = json.load(fw)
 
 
 def fit(model_name,net,loss_type,save,batch_size,epochs,learning_rate,print_step,save_step,zernike_dir,Zernike_alias,maxZnkOrder,eeznk,rms,ngrid,ngrid2,init_intens,Zer,maxZnkDim,mask0,f_m,h_sum,ez,ddxz,gauss_down):
