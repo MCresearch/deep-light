@@ -75,7 +75,7 @@ class Block(nn.Module):
 
 
 class Xception(nn.Module):
-    def __init__(self, num_classes=33):
+    def __init__(self, num_classes=7):
 
         super(Xception, self).__init__()
 

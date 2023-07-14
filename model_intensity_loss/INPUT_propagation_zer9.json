@@ -1,0 +1,19 @@
+{
+    "data":{
+    
+        "mm" : 7,
+        "mgs" : 0,
+        "a0" : 0.3,
+        "xx0" : 4,
+        "plm" : 1e-6,
+        "zfh" : 3e3, 
+        "xxz" : 36,
+        "minZnkDim" : 1,
+        "maxZnkOrder" : 3,
+        "rms" : 4,
+        "eeznk" : 0.2,
+        "zernike_dir": "random",
+        "nsnapshot":2,
+        "dir" : "/home/xianyuer/data/intensityloss_git/zer9/5_1000"
+    }
+}

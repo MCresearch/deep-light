@@ -109,16 +109,16 @@ if data_train == "confirm":
     # x = np.concatenate((x,x4))
     x = x1
     y = y1
-    print("x shape = ", np.shape(x))
-    print("y shape = ", np.shape(y))
-    print("nsnapshot = %s" % nsnapshot)
+    print("x shape = ", np.shape(x), flush=True)
+    print("y shape = ", np.shape(y), flush=True)
+    print("nsnapshot = %s" % nsnapshot, flush=True)
     train_x = x[:nsnapshot].reshape([nsnapshot, 1, ngrid, ngrid])
     train_y = y[:nsnapshot]
     x_train = train_x 
     y_train = train_y 
     # x_train,x_test,y_train,y_test=train_test_split(train_x,train_y,test_size=0.2)
-    print("x_train shape = ", np.shape(x_train))
-    print("y_train shape = ", np.shape(y_train))
+    print("x_train shape = ", np.shape(x_train), flush=True)
+    print("y_train shape = ", np.shape(y_train), flush=True)
     # print("x_test shape = ", np.shape(x_test))
     # print("y_test shape = ", np.shape(y_test))
     x_train = torch.tensor(x_train).to(device)

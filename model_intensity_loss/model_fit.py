@@ -93,7 +93,7 @@ def fit(model_name,net,loss_type,save,batch_size,epochs,learning_rate,print_step
             loss = loss_int + loss_zer
             
         else:
-            print("error loss_type")
+            print("error loss_type", flush=True)
         # Gradient clearing
         opt.zero_grad()
         # backpropagation
@@ -116,7 +116,7 @@ def fit(model_name,net,loss_type,save,batch_size,epochs,learning_rate,print_step
                 , samples
                 , epochs*batch_size
                 , print_step*samples/(epochs*batch_size)
-                , loss.data.item()),"Zer loss: ",loss_zernike)
+                , loss.data.item()),"Zer loss: ",loss_zernike, flush=True)
             fid.write(str(loss.cpu().item())+'\t'+str(loss_zernike))
             fid.write('\n')
         if (epoch + 1) % (save_step) == 0 or epoch  == (epochs - 1):
@@ -170,7 +170,7 @@ def fit2(batchdata,model_name,net,loss_type,save,batch_size,epochs,learning_rate
                 loss_int = torch.mean(pow(far_field_intens_pred - x,2))
                 loss = loss_int + loss_zer 
             else:
-                print("error loss_type")
+                print("error loss_type", flush=True)
             # backpropagation
             loss.backward()
             # Renewal gradient
@@ -193,7 +193,7 @@ def fit2(batchdata,model_name,net,loss_type,save,batch_size,epochs,learning_rate
                     , samples
                     , epochs*len(batchdata.dataset)
                     , 100*samples/(epochs*len(batchdata.dataset))
-                    , loss.data.item()),"Zer loss:{:.3e} ",loss_zernike)
+                    , loss.data.item()),"Zer loss:{:.3e} ",loss_zernike, flush=True)
                 fid.write(str(loss.cpu().item())+'\t'+str(loss_zernike))
                 fid.write('\n')
         if (epoch + 1) % (save_step) == 0 or epoch  == (epochs - 1):
